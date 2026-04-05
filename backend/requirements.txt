@@ -1,0 +1,31 @@
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+pydantic==2.5.3
+pydantic-settings==2.1.0
+python-dotenv==1.0.0
+
+# PDF processing
+PyMuPDF==1.24.0
+pdfplumber==0.10.3
+
+# Image processing
+opencv-python==4.9.0.80
+pytesseract==0.3.10
+pyzbar==0.1.9
+Pillow==10.2.0
+numpy==1.26.3
+
+# Database
+pymongo==4.6.1
+motor==3.3.2
+
+# HTTP
+httpx==0.26.0
+
+# Claude AI
+anthropic>=0.39.0
+
+# Auth (optional)
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4

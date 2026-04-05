@@ -1,0 +1,23 @@
+^XA
+^CF0,30
+
+^FO50,30^FD DHL EXPRESS ^FS
+^FO50,70^FD Service: WPX ^FS
+
+^FO50,120^FD FROM:^FS
+^FO50,150^FD Claudia Weekie ^FS
+^FO50,180^FD Winzigen 10 ^FS
+^FO50,210^FD 6014 Luzern ^FS
+^FO50,240^FD Switzerland ^FS
+
+^FO50,290^FD TO:^FS
+^FO50,320^FD Myt GmbH ^FS
+^FO50,350^FD Ammerstrasse 420 ^FS
+^FO50,380^FD ABCDE Kirchheim ^FS
+^FO50,410^FD Germany ^FS
+
+^FO50,460^FD Weight: 3.5 ^FS
+
+^FO50,500^FD Tracking: JD0146 ^FS
+
+^XZ

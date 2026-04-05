@@ -1,0 +1,1961 @@
+'**** 10 x 15 *****
+
+<script>
+if Shipment.Sender.Attributes(Shipment.CodeCAR)("USE10X15LABEL") = "1" then
+	return "^XA"
+end if
+</script>
+
+^PR6    
+<script>
+if Shipment.Sender.Fields("GENERALDATA")("ZEBRA-LH") <> "" then
+	return Shipment.Sender.Fields("GENERALDATA")("ZEBRA-LH")
+else
+	return "^LH0,0"
+end if
+</script>
+^CI28 
+
+^FO575,14^GFA,01820,01820,00028,
+0000000001FFFFFFFFFFC000003FFFFC01FFFFF01FFFFF,0000000001FFFFFFFFFFF800003FFFFC
+01FFFFF03FFFFF,0000000001FFFFFFFFFFFC00007FFFFC01FFFFE03FFFFF,0000000003FFFFFF
+FFFFFE00007FFFF803FFFFE03FFFFE,0000000003FFFFFFFFFFFF00007FFFF803FFFFE07FFFFE,00
+00000007FFFFFFFFFFFF8000FFFFF803FFFFC07FFFFE,0000000007FFFFFFFFFFFF8000FFFFF007
+FFFFC07FFFFC,000000000FFFFFFFFFFFFFC001FFFFF007FFFF80FFFFFC,000000000FFFFFFFFF
+FFFFC001FFFFF007FFFF80FFFFFC,000000000FFFFFFFFFFFFFE001FFFFE00FFFFF80FFFFF8,00
+0000001FFFFFFFFFFFFFC001FFFFC00FFFFF01FFFFF8,000000001FFFFFFFFFFFFFE003FFFFE00F
+FFFF03FFFFF8,000000001FFFFFFFFFFFFFE003FFFFC01FFFFF01FFFFF0,000000003FFFFFFFFF
+FFFFE007FFFFC01FFFFE03FFFFF0,000000003FFFFFFFFFFFFFE007FFFF801FFFFE03FFFFE0,00
+0000003FFFFFFFFFFFFFE00FFFFF803FFFFE07FFFFE0,000000007FFFFFFFFFFFFFF00FFFFF003F
+FFFC07FFFFC0,000000007FFFFFFFFFFFFFE00FFFFF807FFFFC0FFFFFC0,000000007FFFFFFFFF
+FFFFF01FFFFF007FFFFC0FFFFFC0,00000000FFFFFFFFFFFFFFE01FFFFE007FFFF80FFFFF80,00
+00000000000000007FFFF01FFFFE007FFFF81FFFFF80,000000000000000000FFFFE03FFFFE88FF
+FFF81FFFFF80,0000000000000000007FFFE03FFFFFFFFFFFF01FFFFF,000000000000000000FF
+FFE03FFFFFFFFFFFF03FFFFF,000000000005555000FFFFC07FFFFFFFFFFFE03FFFFF,00000000
+001FFFFE01FFFFC07FFFFFFFFFFFE03FFFFE,00000000001FFFFE01FFFFC07FFFFFFFFFFFC07FFF
+FE,00000000003FFFFE03FFFF80FFFFFFFFFFFFE07FFFFE,00000000003FFFFC03FFFF80FFFFFF
+FFFFFFC07FFFFC,00000000003FFFFC03FFFF80FFFFFFFFFFFF80FFFFFC,00000000007FFFFC07
+FFFF01FFFFFFFFFFFF80FFFFFC,00000000007FFFF807FFFF03FFFFFFFFFFFF80FFFFF8,000000
+00007FFFF807FFFF01FFFFFFFFFFFF01FFFFF8,0000000000FFFFF80FFFFE03FFFFFFFFFFFF01FF
+FFF8,0000000000FFFFF00FFFFE03FFFFFFFFFFFF01FFFFF0,0000000000FFFFF00FFFFE07FFFF
+FFFFFFFE03FFFFF0,0000000001FFFFF00FFFFC07FFFFFFFFFFFE03FFFFE0,0000000001FFFFE0
+0EEEEC0EEEEEEEEEEEEE02EEEEE0,0000000001FFFFC0,0000000003FFFFE00000020000000000
+0002,0000000003FFFFC0,0000000007FFFFC0,0000000007FFFFE0,FFFFFFFF8FFFFFFFFFFFF0
+3FFFFE00FFFFF81FFFFFFFFFFFC7FFFFFEFFFFFFFF07FFFFFFFFFFE03FFFFC00FFFFF01FFFFFFF
+FFFF87FFFFFEFFFFFFFF0FFFFFFFFFFFE03FFFFC01FFFFF03FFFFFFFFFFF8FFFFFFEFFFFFFFF0F
+FFFFFFFFFFC07FFFFC01FFFFE03FFFFFFFFFFF0FFFFFFE222222221FFFFFFFFFFFC07FFFF803FF
+FFE23FFFFFFFFFFF22222222000000001FFFFFFFFFFFC07FFFF803FFFFC07FFFFFFFFFFF,000000
+003FFFFFFFFFFF80FFFFF803FFFFC07FFFFFFFFFFE,000000003FFFFFFFFFFF00FFFFF007FFFFC0
+7FFFFFFFFFFE,FFFFFFFC3FFFFFFFFFFF20FFFFF007FFFF80FFFFFFFFFFFE3FFFFFFEFFFFFFFC7F
+FFFFFFFFFF01FFFFF007FFFF807FFFFFFFFFFC3FFFFFFEFFFFFFF87FFFFFFFFFFE01FFFFE00FFF
+FF80FFFFFFFFFFFC3FFFFFFEFFFFFFF87FFFFFFFFFFC01FFFFE00FFFFF00FFFFFFFFFFFC7FFFFF
+FEFFFFFFF8FFFFFFFFFFF803FFFFE00FFFFF00FFFFFFFFFFF87FFFFFFE00000000FFFFFFFFFFF0
+03FFFFC01FFFFF007FFFFFFFFFF8,00000000FFFFFFFFFFF007FFFFC01FFFFE00FFFFFFFFFFF8,00
+000001FFFFFFFFFFE007FFFFC01FFFFE007FFFFFFFFFF0,BBBBBBA1FFFFFFFFFFE00FFFFF803FFF
+FE007FFFFFFFFFF0BBBBBBBAFFFFFFE1FFFFFFFFFF8007FFFF003FFFFC003FFFFFFFFFF1FFFFFF
+FEFFFFFFE3FFFFFFFFFF000FFFFF803FFFFC001FFFFFFFFFE1FFFFFFFEFFFFFFC3FFFFFFFFFC00
+0FFFFF007FFFFC0007FFFFFFFFC1FFFFFFFEFFFFFF83FFFFFFFFE0001FFFFF02FFFFF80003FFFF
+FFFFE3FFFFFFFE00,
+
+
+<script>
+
+if Shipment.Addresses("RECEIVER").ISOcountry = "DE" or Shipment.Addresses("RETURNTO").ISOcountry = "DE" then
+
+if parcel.weight >= "20" then
+
+return "^FO700,570^GFA,1105,1105,13,O0LFE,N01MF,N03MF8,N03FFC03FFC,N07FFI0FFE,N0FFCI07FF,N0FF8I03FF,M01FFJ01FF8,M01FEK0FF8,M03FEK07FC,M03FCK07FC,M03FCK03FC,M03FCK03FE,M07F8K03FE,M07F8K01FE,:::K0CCFFCK07FF82C,J07UFE,J0VFE,J0WF,::::I01FFC7JFCNF,I01FC007FFC00MF,I01F8003FFI07LF8,I01EI01FEI03LF8,I01CJ0FEI01LF8,I01CJ0FCI01FFE0FF8,I01EJ0FCJ0FFE07F8,I03E0700780300FFE07F8,I03F9F80780780FFE07F8,I03IFC0780FC0FFE07F8,I03IFC0780FC07FE07FC,I03IF80780FC07FE07FC,I03IF00F00FC078I03E,:I07FFE01F00FC078I01E,I07FFC01F00FC078I01E,I07FF803F00FC078I01E,I07FF007F00FC078I03E,I07FE00FF00FC07FE07FE,I07FC01FF80FC07FE07FF,I07F803FF80FC07FE07FF,I0FF007FF80F80FFE07FF,I0FE007FF80780FFE07FF,I0FEJ07C0300FFE07FF,I0FEJ07CI01FFE0IF,I0FEJ07CI01MF,001FEJ07EI03MF8,001FEJ07FI03MF8,001FEJ07F800NF8,001OF03NF8,001YF8,003YF8,:003LFE3QF8,003LFE1QFC,::003LFE18F00MFC,007LFE10E00MFC,007LFE00E00MFC,007LFE01E10MFE,007LFE01E38MFE,:007LFE01E38NF,007LFE00E10NF,007LFE10E00NF,00MFE10700NF,00MFE38780NF,00RF0NF,00QF00NF,00QF01NF,00QF03NF8,00QF8OF8,01gGF8,:,:::^FS"
+
+end if
+
+if parcel.weight >= "10" then
+
+return "^FO700,570^GFA,1232,1232,14,Q03JFC,Q0KFE,P01LF8,P07LFC,P0MFE,P0NF,O01FFE00IF8,O03FF8003FF8,O03FFI01FFC,O07FEJ0FFE,O07FCJ07FE,O0FF8J03FF,O0FF8J01FF,O0FFK01FF,N01FFL0FF,N01FEL0FF8,:::N01FEL07F8,K03VFC,K07VFE,::K0WFE,K0F8T03E,K0F8T01E,K0FU01F,::K0F098J0FFL01F,J01JF8003FFCK01F,J01JF8007FFEK01F,J01JF800JFL0F,J01E7FF801JFL0F,J01E7FF801JF800FC0F8,J01E3FF801FE7F800FC0F8,J01E07F803FC3F800FC0F8,J01E07F803FC1FC00FC0F8,J03E07F803F81FC00FC0F8,J03E07F803F81FC00FC078,J03C07F803F81FC00FE07C,J03C07F803F81FC3JF7C,::J07C07F803F81FC3JF7E,J07C07F803F81FC3JF3E,J07C07F803F81FC01FE03E,J07807F803F81FC00FC03E,:J0F807F803FC1FC00FC03E,J0F807F803FC3FC00FC01E,J0F83IF01FE7F800FC01F,J0F87IF81JF800FC01F,J0F87IF81JFL01F,J0F07IF80JFL01F,J0F07IF807FFEL01F,I01F07IF803FFCL01F,I01F07IF801FF8M0F,I01FX0F8,::I01EX0F8,:I03EL0EQ0F8,I03EL0FQ07C,::I03EL0F3C3F8L07C,I03CL0F7C7FCL07C,I07CL0FF8FFCL07C,I07CL0FF0F3CL03E,:::I0FCL0FF8F3CL03E,I0F8L0FF8FFCL01E,I0F8L0F7C7FCL01E,I0F8L0F3C7FCL01F,I0F8L0E3E03CL01F,I0F8P03CL01F,001FP02F8L01F,001FP07F8L01F,001gHF,:001gHF8,:001gHF,^FS"
+end if
+
+end if
+
+</script>
+
+<script>
+dim sServiceDescDHL
+if Shipment.Attributes("DHL_PRODUCT_NAME") <> "" then
+	sServiceDescDHL = Shipment.Attributes("DHL_PRODUCT_NAME")
+else
+	sServiceDescDHL = Shipment.CarrierService.FreeText3
+end if
+
+return "^FO50,20^A0N,40,30^FD" & sServiceDescDHL.ToUpper & "^FS"
+</script>
+
+^FO50,65^A0N,15,15^FDCentiro Systems v1,1 / <script>
+if Shipment.Shipdate > Shipment.cr_time_db
+	return DatePart("yyyy",shipment.shipdate) & "-" & right("0" & DatePart("m",shipment.shipdate),2) & "-" & right("0" & DatePart("d",shipment.shipdate),2)
+else
+	return DatePart("yyyy",shipment.cr_time_db) & "-" & right("0" & DatePart("m",shipment.cr_time_db),2) & "-" & right("0" & DatePart("d",shipment.cr_time_db),2)
+end if
+</script> / 14-1405^FS 
+
+^FO395,0^GB174,82,2^FS
+
+<script>
+dim sServiceCodeDHL
+if Shipment.Attributes("DHL_CONTENT_CODE") <> "" then
+	sServiceCodeDHL = Shipment.Attributes("DHL_CONTENT_CODE")
+else
+	sServiceCodeDHL = Shipment.CarrierService.DeliveryInstruction
+end if
+
+return "^FO420,20^FR^A0N,60,60^FD" & sServiceCodeDHL.ToUpper & "^FS"
+</script>
+
+<script>
+dim customs = "false"
+
+if Shipment.Carrierservice.description.indexOf("non-doc") > 0 then
+	customs = "true"
+else
+	customs = "false"
+end if
+
+if customs = "true" or Shipment.Attributes("DHL_CONTENT_VIDEO") = "Y" then
+	return "^FO397,2^FR^GB172,78,78^FS"
+end if
+</script>
+
+^FO0,80^GB800,2,2^FS
+
+^FO8,88^A0N,19,21^FDFROM:^FS
+<script>
+dim sCrLf = chr(13) & chr(10)
+dim sSenderAddressString = ""
+dim sSenderName = Shipment.Sender.Name
+dim sSenderAddr1 = Shipment.Sender.Address1
+dim sSenderAddr2 = Shipment.Sender.Address2
+dim sSenderZipCode = Shipment.Sender.ZipCode
+dim sSenderCity = Shipment.Sender.City
+dim sSenderCountryDescription = Shipment.Sender.Country.Description
+
+dim sSenderLine1 = ""
+dim sSenderLine2 = ""
+dim sSenderLine3 = ""
+dim sSenderLine4 = ""
+dim sSenderLine5 = ""
+
+if Shipment.Addresses("RETURNTO").Name <> "" then
+	sSenderName = Shipment.Addresses("RETURNTO").Name
+	sSenderAddr1 = Shipment.Addresses("RETURNTO").Address1
+	sSenderAddr2 = Shipment.Addresses("RETURNTO").Address2
+	sSenderZipCode = Shipment.Addresses("RETURNTO").ZipCode
+	sSenderCity = Shipment.Addresses("RETURNTO").City
+	sSenderCountryDescription = Shipment.Addresses("RETURNTO").Country.Description
+
+else if Shipment.Addresses("PICKUP").Name <> "" then
+	sSenderName = Shipment.Addresses("PICKUP").Name
+	sSenderAddr1 = Shipment.Addresses("PICKUP").Address1
+	sSenderAddr2 = Shipment.Addresses("PICKUP").Address2
+	sSenderZipCode = Shipment.Addresses("PICKUP").ZipCode
+	sSenderCity = Shipment.Addresses("PICKUP").City
+	sSenderCountryDescription = Shipment.Addresses("PICKUP").Country.Description
+
+else if Shipment.Addresses("SENDER").Name <> "" then
+	sSenderName = Shipment.Addresses("SENDER").Name
+	sSenderAddr1 = Shipment.Addresses("SENDER").Address1
+	sSenderAddr2 = Shipment.Addresses("SENDER").Address2
+	sSenderZipCode = Shipment.Addresses("SENDER").ZipCode
+	sSenderCity = Shipment.Addresses("SENDER").City
+	sSenderCountryDescription = Shipment.Addresses("SENDER").Country.Description
+end if
+
+sSenderAddressString = left(sSenderName,35) & "|" & left(sSenderAddr1,35) & "|" & left(sSenderAddr2,35) & "|" & left(sSenderZipCode & " " & sSenderCity,35) & "|" & left(sSenderCountryDescription.ToUpper,35)
+
+sSenderAddressString = replace(replace(sSenderAddressString,"||", "|"),"||", "|")
+
+dim myarray As string()
+
+myarray = Split(sSenderAddressString, "|")
+
+dim arraycount
+arraycount = myarray.length
+
+if arraycount > 0 then
+	sSenderLine1 = myarray(0)
+end if
+
+if arraycount > 1 then
+	sSenderLine2  = myarray(1)
+end if
+
+if arraycount > 2 then
+	sSenderLine3 = myarray(2)
+end if
+
+if arraycount > 3 then
+	sSenderLine4 = myarray(3)
+end if
+
+if arraycount > 4 then
+	sSenderLine5 = myarray(4)
+end if
+
+return "^FO80,88^A0N,19,21^FD" & sSenderLine1 & "^FS" & sCrLf & "^FO80,110^A0N,19,21^FD" & sSenderLine2 & "^FS" & sCrLf & "^FO80,132^A0N,19,21^FD" & sSenderLine3 & "^FS" & sCrLf & "^FO80,154^A0N,19,21^FD" & sSenderLine4 & "^FS" & sCrLf & "^FO80,170^A0N,19,21^FD" & sSenderLine5 & "^FS"
+</script>
+
+<script>
+dim sCrLf = chr(13) & chr(10)
+dim sSenderContact = Shipment.Sender.Reference
+dim sSenderContactOutput = ""
+
+if Shipment.Addresses("PICKUP").Name <> "" then
+sSenderContact = Shipment.Addresses("PICKUP").Contact
+
+else if Shipment.Addresses("SENDER").Name <> "" then
+	sSenderContact = Shipment.Addresses("SENDER").Contact
+end if
+
+if sSenderContact <> "" then
+	sSenderContactOutput = "^FO450,88^A0N,22,22^FDContact:^FS" & sCrLf & "^FO450,110^A0N,22,22^FD" & left(sSenderContact,25) & "^FS"
+end if
+
+return sSenderContactOutput
+</script>
+
+^FO680,90^A0N,15,15^FDOrigin:^FS
+<script>
+dim sDepot
+if Shipment.Attributes("DHL_ORG_SRVA_CODE") <> "" then
+	sDepot = Shipment.Attributes("DHL_ORG_SRVA_CODE")
+else
+	sDepot = Shipment.Sender.Attributes(Shipment.CodeCAR)("DEPOT")
+end if
+
+return "^FO680,110^A0N,50,60^FD" & sDepot.ToUpper & "^FS"
+</script>
+
+^FO0,185^GB32,0,6^FS
+^FO0,185^GB0,32,6^FS
+
+^FO730,185^GB32,0,6^FS
+^FO762,185^GB0,32,6^FS
+
+^FO0,341^GB32,0,6^FS
+^FO0,315^GB0,32,6^FS
+
+^FO730,341^GB32,0,6^FS
+^FO762,315^GB0,32,6^FS
+
+^FO0,183^GB800,2,2^FS
+
+^FO8,195^A0N,22,25^FDTO:^FS
+<script>
+dim sCrLf = chr(13) & chr(10)
+dim sReceiverAddressString = ""
+dim sReceiverName = Shipment.Receiver.Name
+dim sReceiverAddr1 = Shipment.Receiver.Address1
+dim sReceiverAddr2 = Shipment.Receiver.Address2
+dim sReceiverAddr3 = Shipment.Receiver.Address3
+dim sReceiverZipCode = Shipment.Receiver.ZipCode
+dim sReceiverCity = Shipment.Receiver.City
+
+dim sReceiverLine1 = ""
+dim sReceiverLine2 = ""
+dim sReceiverLine3 = ""
+dim sReceiverLine4 = ""
+
+if Shipment.Addresses("RECEIVER").Name <> "" then
+	sReceiverName = Shipment.Addresses("RECEIVER").Name
+	sReceiverAddr1 = Shipment.Addresses("RECEIVER").Address1
+	sReceiverAddr2 = Shipment.Addresses("RECEIVER").Address2
+	sReceiverAddr3 = Shipment.Addresses("RECEIVER").Address3
+	sReceiverZipCode = Shipment.Addresses("RECEIVER").ZipCode
+	sReceiverCity = Shipment.Addresses("RECEIVER").City
+end if
+
+sReceiverAddressString = left(sReceiverName,35) & "|" & left(sReceiverAddr1,35) & "|" & left(sReceiverAddr2,35) & "|" & left(sReceiverAddr3,35)
+
+sReceiverAddressString = replace(replace(sReceiverAddressString,"||", "|"),"||", "|")
+
+dim myarray As string()
+myarray = Split(sReceiverAddressString, "|")
+
+Dim arraycount
+arraycount = myarray.length
+
+if arraycount > 0 then
+	sReceiverLine1 = myarray(0)
+end if
+
+if arraycount > 1 then
+	sReceiverLine2  = myarray(1)
+end if
+
+if arraycount > 2 then
+	sReceiverLine3 = myarray(2)
+end if
+
+if arraycount > 3 then
+	sReceiverLine4 = myarray(3)
+end if
+
+return "^FO80,195^A0N,20,23^FD" & sReceiverLine1 & "^FS" & sCrLf & "^FO80,220^A0N,20,23^FD" & sReceiverLine2 & "^FS" & sCrLf & "^FO80,245^A0N,20,23^FD" & sReceiverLine3 & "^FS" & sCrLf & "^FO80,270^A0N,20,23^FD" & sReceiverLine4 & "^FS"
+</script>
+
+<script>
+dim sCrLf = chr(13) & chr(10)
+dim sReceiverZipCode = Shipment.Receiver.ZipCode
+dim sReceiverCity = Shipment.Receiver.City
+dim sReceiverState = Shipment.Receiver.State
+dim sReceiverCountryDescription = Shipment.Receiver.Country.Description
+dim sReceiverISOCountry = Shipment.Receiver.ISOCountry
+dim sReceiverOutLine1 = ""
+dim sReceiverOutLine2 = ""
+
+if Shipment.Addresses("RECEIVER").Name <> "" then
+	sReceiverZipCode = Shipment.Addresses("RECEIVER").ZipCode
+	sReceiverCity = Shipment.Addresses("RECEIVER").City
+	sReceiverState = Shipment.Addresses("RECEIVER").State
+	sReceiverCountryDescription = Shipment.Addresses("RECEIVER").Country.Description
+	sReceiverISOCountry = Shipment.Addresses("RECEIVER").ISOCountry
+end if
+
+if Shipment.Attributes("DHL_DEST_POSTCODE") <> "" then
+	sReceiverZipCode = Shipment.Attributes("DHL_DEST_POSTCODE")
+	sReceiverCity = Shipment.Addresses("RECEIVER").City
+	sReceiverState = Shipment.Addresses("RECEIVER").State
+	sReceiverCountryDescription = Shipment.Attributes("DHL_DEST_COUNTRY_NAME")
+	sReceiverISOCountry = Shipment.Addresses("RECEIVER").ISOCountry
+end if
+
+if sReceiverISOCountry.ToUpper = "US" OR sReceiverISOCountry.ToUpper = "CA" then
+	sReceiverOutLine1 = sReceiverCity & " " & sReceiverState & " " & sReceiverZipCode
+	sReceiverOutLine2 = sReceiverCountryDescription
+else
+	sReceiverOutLine1 = sReceiverZipCode & " " & sReceiverCity
+	sReceiverOutLine2 = sReceiverCountryDescription
+end if
+
+return "^FO80,290^A0N,27,29^FD" & sReceiverOutLine1 & "^FS" & sCrLf & "^FO80,315^A0N,27,29^FD" & sReceiverOutLine2.ToUpper & "^FS"
+</script>
+
+<script>
+dim sCrLf = chr(13) & chr(10)
+dim sReceiverContact = Shipment.Receiver.Reference
+dim sReceiverContactOutput = ""
+
+if Shipment.Addresses("RECEIVER").Name <> "" then
+	sReceiverContact = Shipment.Addresses("RECEIVER").Contact
+end if
+
+if sReceiverContact <> "" then
+	sReceiverContactOutput = "^FO525,205^A0N,22,23^FDContact:^FS" & sCrLf & "^FO525,230^A0N,22,23^FD" & left(sReceiverContact,25) & "^FS"
+end if
+
+return sReceiverContactOutput
+</script>
+
+^FO0,346^GB800,2,2^FS
+
+^FO8,350^A0N,40,40^FD<script>
+if Shipment.Attributes("DHL_ROUT_OUTBOUND")<> "" then
+return Shipment.Attributes("DHL_ROUT_OUTBOUND")
+ else
+return "."
+end if
+</script>^FS
+
+<script>
+dim sRouteCode
+
+if Shipment.Attributes("DHL_CONTENT_CODE") <> "" then
+	sRouteCode = Shipment.Attributes("DHL_DEST_COUNTRY_CODE") & "-" & Shipment.Attributes("DHL_DEST_SRVA_CODE") & "-" & Shipment.Attributes("DHL_DEST_FAC_CODE")
+else
+	sRouteCode = Shipment.Receiver.ISOCountry & "-" & Shipment.Routing1 & "-" & Shipment.Routing2
+end if
+
+return "^FO160,350^A0N,40,40^FD" & sRouteCode & "^FS"
+</script>
+
+^FO682,350^A0N,40,40^FD<script>
+if Shipment.Attributes("DHL_ROUT_INBOUND")<> "" then
+return Shipment.Attributes("DHL_ROUT_INBOUND")
+ else
+return "."
+end if
+</script>^FS
+
+^FO0,384^GB800,2,2^FS
+
+^FO0,386^FR^GB300,40,30^FS
+
+
+
+^FO8,390^A0N,40,30^FR^FD<script>
+dim customs = "false"
+
+if Shipment.Carrierservice.description.indexOf("non-doc") > 0 then
+	customs = "true"
+else
+	customs = "false"
+end if
+
+if Shipment.Attributes("DHL_CODE_ON_LABEL") <> "" then
+	return Shipment.Attributes("DHL_CODE_ON_LABEL")
+else 
+	dim sAttributes = ""
+
+if customs = "true" then 
+	sAttributes = sAttributes & "C" & "-"
+else
+	sAttributes = sAttributes 
+end if
+
+dim sservicecode = "false"
+if Shipment.CodeCSE = "WMX" or Shipment.CodeCSE = "WPX" or Shipment.CodeCSE = "TDY" or Shipment.CodeCSE = "TDE" or Shipment.CodeCSE = "ESI" or Shipment.CodeCSE = "FRT" or Shipment.CodeCSE = "TDM" or Shipment.CodeCSE = "EPP" then
+sservicecode = "true"
+end if
+
+if Shipment.Attributes("TermsOfDelivery") = "DDP" and sservicecode = "true" then
+	sAttributes = sAttributes & "DTP" & "-"
+else if Shipment.IsSelectedServiceAttribute("DTP") then
+	sAttributes = sAttributes & "DTP" & "-"
+
+end if
+
+if Shipment.TranspPayer = "C" then
+	sAttributes = sAttributes & "ExW" & "-"
+end if
+
+if Shipment.IsSelectedServiceAttribute("hold") then
+	sAttributes = sAttributes & "H" & "-"
+end if
+
+if Shipment.IsSelectedServiceAttribute("cod") then
+	sAttributes = sAttributes & "C.O.D." & "-"
+end if
+
+if Shipment.IsSelectedServiceAttribute("nds") then
+	sAttributes = sAttributes & "NDS" & "-"
+end if
+
+if Shipment.IsSelectedServiceAttribute("bbm") then
+	sAttributes = sAttributes & "BBM" & "-"
+end if
+
+if Shipment.IsSelectedServiceAttribute("PT") OR Shipment.IsSelectedServiceAttribute("PU") OR Shipment.IsSelectedServiceAttribute("803") then
+	sAttributes = sAttributes & "RET" & "-"
+end if
+
+if Shipment.IsSelectedServiceAttribute("HH") then
+	sAttributes = sAttributes & "REQ" & "-"
+end if
+
+if Shipment.IsSelectedServiceAttribute("LQ") then
+	sAttributes = sAttributes & "ADR" & "-"
+end if
+
+if Shipment.IsSelectedServiceAttribute("HY") then
+	sAttributes = sAttributes & "RDS" & "-"
+end if
+
+if Shipment.IsSelectedServiceAttribute("HE") then
+	sAttributes = sAttributes & "HAZ" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HW") then
+	sAttributes = sAttributes & "ELM" & "-"
+end if
+
+dim sLength = CInt(Len(sAttributes))
+if sLength > 1 then
+	return left(sAttributes,sLength-1)
+	end if
+end if
+</script>^FS
+
+^FO580,390^A0N,18,17^FDDay^FS
+^FO580,410^A0N,20,20^FD<script>
+if Shipment.Attributes("DHL_DELV_DAY") <> "" then
+	return Shipment.Attributes("DHL_DELV_DAY")
+else if Shipment.isSelectedServiceAttribute("sat") then 
+	return "S"
+else
+	return ""
+end if
+</script>^FS
+
+^FO680,390^A0N,18,17^FDTime^FS
+^FO680,410^A0N,20,20^FD<script>
+if Shipment.Attributes("DHL_DELV_TIME") <> "" then
+	return Shipment.Attributes("DHL_DELV_TIME")
+else if Shipment.CodeCSE.toupper = "TDE" OR Shipment.CodeCSE.toupper = "TDK" OR Shipment.CodeCSE.toupper = "DOK" then
+	return "X09"
+else if Shipment.CodeCSE.toupper = "TDT" OR Shipment.CodeCSE.toupper = "TDY" OR Shipment.CodeCSE.toupper = "DOT" then
+	return "X12"
+else
+	return ""
+end if
+</script>^FS
+
+^FO0,425^GB800,2,2^FS
+
+^FO8,430^A0N,18,17^FDRef code:^FS
+^FO110,430^A0N,22,23^FD<script>
+dim sSenRef
+
+if Shipment.Attributes("SENDERREFERENCE1") <> "" then
+	sSenRef = Shipment.Attributes("SENDERREFERENCE1")
+else if Shipment.OrderNo <> "" then
+	sSenRef = Shipment.OrderNo
+else if Shipment.Reference <> "" then
+	sSenRef = Shipment.Reference
+end if
+
+return sSenRef
+</script>^FS
+
+
+
+^FO8,450^A0N,18,17^FDShipment ID:^FS
+^FO110,450^A0N,18,17^FD<Shipment.ExternalID>^FS
+
+^FO8,543^A0N,20,20^FD<script>
+if Shipment.Sender.ISOCountry = "US" and Shipment.Attributes("ExportComplianceStatement") = "" then
+	return "NOEEI Sec. 30.37(a)"
+else
+	return Shipment.Attributes("ExportComplianceStatement")
+end if
+</script>^FS
+
+^FO8,470^A0N,18,17^FDParcel ID:^FS
+^FO110,470^A0N,22,23^FD<parcel.parcelid>^FS
+
+^FO480,430^A0N,18,17^FDPackage / Shipment Weight:^FS
+^FO480,450^A0N,30,25^FD <script>
+if Shipment.Sender.ISOCountry.ToUpper = "US" then
+	return Parcel.WeightInLBS.ToString("0.0") & " / " & Shipment.WeightInLBS.ToString("0.0") & " lbs"
+else 
+	return Parcel.Weight.ToString("0.0") &  " / " & Shipment.Weight.ToString("0.0") &  " kg"
+end if
+</script>^FS
+
+^FO690,430^A0N,18,17^FDPiece:^FS
+
+^FO680,450^A0N,45,45^FD<script>
+dim parcelcounter = Parcel.ParcelCounter
+
+dim maxparcelcount = Parcel.MaxParcelCounter
+
+if Shipment.Attributes("TRANSPORTTYPE") = "PARCEL" then
+return parcelcounter &"/"& maxparcelcount
+
+else
+
+return  parcelcounter & "/X"
+
+end if
+
+</script>^FS
+
+
+
+
+^FO0,562^GB800,2,2^FS
+
+^FO50,570^BY3,2.7^B3N,N,90,N,N^FD<Shipment.SequenceNo>^FS
+
+
+^FO660,670^A0N,26,20^FDContent:^FS
+<script>
+Dim str As String = Parcel.TypeOfGoods
+
+str = Replace(str, "^","")    
+Dim chunkSize As Integer = 15
+   
+ Dim stringLength As Integer = str.Length
+    
+Dim i As Integer = 0
+
+Dim toReturn = ""
+
+Dim rowHeight = 1
+
+Dim counter = 0
+   
+ While i < stringLength
+       
+ If i + chunkSize > stringLength Then chunkSize = stringLength - i
+       
+counter = counter + 26   
+ If counter = 3 then
+       
+Console.WriteLine(str.Length)
+       
+Console.WriteLine(chunkSize)
+       
+Console.WriteLine(i)
+          
+ toReturn &= "^FO660," & (697 + counter) + rowHeight & "^A0N,26,20^FD" & str.Substring(i, str.Length - i) & "^FS"
+       
+ exit while
+      
+ end if
+       
+ toReturn &= "^FO660," & (697 + counter) + rowHeight & "^A0N,26,20^FD" & str.Substring(i, chunkSize) & "^FS"
+     
+        
+i += chunkSize
+    
+End While
+
+return toReturn
+</script>
+
+
+
+^FO30,515^A0N,18,17^FD<script>
+if Shipment.Sender.ISOCountry.ToUpper = "US" then
+	return "These commodities, technology, or software were exported from the United States in accordance" 
+else 
+	return ""
+end if
+</script>^FS
+
+^FO30,532^A0N,18,17^FD<script>
+if Shipment.Sender.ISOCountry.ToUpper = "US" then
+	return "with the Export Administration Regulations. Diversion contrary to U.S law is prohibited." 
+else 
+	return ""
+end if
+</script>^FS
+
+^FO08,558^A0N,25,15^FD<script>
+dim sAttributes = ""
+if Shipment.IsSelectedServiceAttribute("HD") then
+	sAttributes = sAttributes & "LITHIUM ION BATTERIES IN COMPLIANCE WITH SECTION II OF PI966" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HV") then
+	sAttributes = sAttributes & "LITHIUM ION BATTERIES IN COMPLIANCE WITH SECTION II OF PI967" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HM") then
+	sAttributes = sAttributes & "LITHIUM METAL BATTERIES IN COMPLIANCE WITH SECTION II OF PI969" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HH") then
+	sAttributes = sAttributes & "DANGEROUS GOODS IN EXCEPTED QUANTITIES" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("LQ") then
+	sAttributes = sAttributes & "LIMITED QUANTITIES ROAD ONLY" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HY") then
+	sAttributes = sAttributes & "UN3245 GMO/GMMO" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HE") and Shipment.Attributes("DNG_AIRCRAFT") = "PAX" then
+	sAttributes = sAttributes & "DANGEROUS GOODS AS PER ASSOCIATED DGD " & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HE") and Shipment.Attributes("DNG_AIRCRAFT") <> "PAX" then
+	sAttributes = sAttributes & "DANGEROUS GOODS AS PER ASSOCIATED DGD - CAO" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HW") then
+	sAttributes = sAttributes & "LITHIUM METAL BATTERIES IN COMPLIANCE WITH SECTION II OF PI970" & "-"
+end if
+
+dim sLength = CInt(Len(sAttributes))
+if sLength > 1 then
+	return left(sAttributes,sLength-1)
+	end if
+
+</script>^FS
+
+<script>
+if Shipment.CodeCSE.ToUpper = "BBX" then
+	return "^FO630,780^A0N,26,20^FDCleared^FS" & "^FO630,805^A0N,26,20^FDunder waybill:^FS" & "^FO630,835^A0N,30,30^FD" & Shipment.MasterSeqNo & "^FS"  
+end if
+</script>
+
+^FO50,670^A0N,25,25^FDWAYBILL:^FS
+^FO170,670^A0N,25,25^FD<script>
+	return mid(Shipment.SequenceNo,1,2) & " " & mid(Shipment.SequenceNo,3,4) & " " & mid(Shipment.SequenceNo,7,4)
+</script>^FS
+
+<script>
+dim customs = "false"
+
+if Shipment.Carrierservice.description.indexOf("non-doc") > 0 then
+	customs = "true"
+else
+	customs = "false"
+end if
+
+if Shipment.Attributes("DHL_ROUTING_CODE_DATA_INDENTIFIER") <> "" then
+	dim sRoutingBarcodeDHL = "^BY3^FO50,710^BCN,205,N,N,N,A^FD" & Shipment.Attributes("DHL_ROUTING_CODE_DATA_INDENTIFIER") & Shipment.Attributes("DHL_ROUTING_CODE_TEXT") & "^FS"
+	dim sRoutingTextDHL = "^FO260,930^A0N,20,21^FD" & "(" & Shipment.Attributes("DHL_ROUTING_CODE_DATA_INDENTIFIER") & ")" & Shipment.Attributes("DHL_ROUTING_CODE_TEXT") & "^FS"
+	return  sRoutingBarcodeDHL &  sRoutingTextDHL
+else 
+	dim iAttributeValue = "0"
+	dim sAttributeValue = "000"
+	dim sRoutingBarcode = ""
+	dim sRoutingBarcodeText = ""
+	dim sRoutingTime = "0"
+
+if customs = "true" then
+	iAttributeValue = iAttributeValue + 1
+else
+	iAttributeValue = iAttributeValue
+end if
+
+if Shipment.IsSelectedServiceAttribute("cod") then
+	iAttributeValue = iAttributeValue + 2
+end if
+
+if Shipment.TranspPayer = "C" then
+	iAttributeValue = iAttributeValue + 4
+end if
+
+
+if Shipment.IsSelectedServiceAttribute("bbm") then
+	iAttributeValue = iAttributeValue + 16
+end if
+
+if Shipment.CodeCSE.ToUpper = "TDE" OR Shipment.CodeCSE.ToUpper = "TDK" OR Shipment.CodeCSE.ToUpper = "DOK" then
+	sRoutingTime = "1"
+end if
+
+if Shipment.CodeCSE.ToUpper = "TDT" OR Shipment.CodeCSE.ToUpper = "TDY" OR Shipment.CodeCSE.ToUpper = "DOT" then
+	sRoutingTime = "2"
+else if Shipment.Receiver.ISOCountry = "IE" then
+	sAttributeValue = Right("000" & iAttributeValue,3)
+	sRoutingBarcode = "^BY3^FO50,710^BCN,205,N,N,N,A^FD" & "2L" & Shipment.receiver.ISOCountry & Shipment.Routing1 & Shipment.Routing2 & "+" & Shipment.Carrierservice.FreeText2 & "00" & sRoutingTime & sAttributeValue & "^FS"
+	sRoutingBarcodeText = "^FO260,930^A0N,20,21^FD" & "(2L)" & Shipment.receiver.ISOCountry & Shipment.Routing1 & Shipment.Routing2 & "+" & Shipment.Carrierservice.FreeText2 & "00" & sRoutingTime & sAttributeValue & "^FS"
+	return  sRoutingBarcode & chr(13) & chr(10) & sRoutingBarcodeText
+end if
+	sAttributeValue = Right("000" & iAttributeValue,3)
+	sRoutingBarcode = "^BY3^FO50,710^BCN,205,N,N,N,A^FD" & "2L" & Shipment.receiver.ISOCountry & replace(Shipment.Receiver.ZipCode," ","") & "+" & Shipment.Carrierservice.FreeText2 & "00" & sRoutingTime & sAttributeValue & "^FS"
+	sRoutingBarcodeText = "^FO260,930^A0N,20,21^FD" & "(2L)" & Shipment.receiver.ISOCountry & replace(Shipment.Receiver.ZipCode," ","") & "+" & Shipment.Carrierservice.FreeText2 & "00" & sRoutingTime & sAttributeValue & "^FS"
+	return  sRoutingBarcode & chr(13) & chr(10) & sRoutingBarcodeText
+end if
+</script>
+
+^BY4^FO50,960^BCN,205,N,N,Y^FD>;>8<Parcel.SequenceNoSSCC>^FS
+
+^FO230,1170^A0N,20,21^FD<script>
+	return "(" & mid(Parcel.SequenceNoSSCC,1,2) & ")" & mid(Parcel.SequenceNoSSCC,3,8) & " " & mid(Parcel.SequenceNoSSCC,11,9) & " " & mid(Parcel.SequenceNoSSCC,20,1)
+</script>^FS
+
+<script>
+if shipment.status = "99" then
+	return "^FO6,752^A0N,270,270^FDERROR^FS" 
+else 
+	return "" 
+end if
+</script>
+
+^FO0,400^A0N,100,70^FD<script>
+if Shipment.Status = "99" then
+	return Shipment.Routingerror
+end if
+</script>^FS
+<SubLabelTemplate>
+
+
+
+^PQ1
+^CI0
+^XZ
+
+^PQ1
+^CI0
+^XZ
+
+
+'***** 10 x 20 label *****
+
+<script>
+if Shipment.Sender.Attributes(Shipment.CodeCAR)("USE10X15LABEL") <> "1" then
+	return "^XA"
+end if
+</script>
+
+^PR6    
+<script>
+
+dim sLabelHome = "^LH10,10"
+
+ 
+
+
+if Shipment.Sender.Attributes(Shipment.CodeCAR)("ZEBRA-LH") <> "" then
+ 
+    sLabelHome = Shipment.Sender.Attributes(Shipment.CodeCAR)("ZEBRA-LH")
+
+else if Shipment.Sender.Attributes("GENERALDATA")("ZEBRA-LH") <> "" then
+
+    sLabelHome = Shipment.Sender.Attributes("GENERALDATA")("ZEBRA-LH")
+
+end if
+
+ 
+
+
+return sLabelHome
+
+</script>
+
+^CI27
+
+^FO575,14^GFA,01820,01820,00028,
+0000000001FFFFFFFFFFC000003FFFFC01FFFFF01FFFFF,0000000001FFFFFFFFFFF800003FFFFC
+01FFFFF03FFFFF,0000000001FFFFFFFFFFFC00007FFFFC01FFFFE03FFFFF,0000000003FFFFFF
+FFFFFE00007FFFF803FFFFE03FFFFE,0000000003FFFFFFFFFFFF00007FFFF803FFFFE07FFFFE,00
+00000007FFFFFFFFFFFF8000FFFFF803FFFFC07FFFFE,0000000007FFFFFFFFFFFF8000FFFFF007
+FFFFC07FFFFC,000000000FFFFFFFFFFFFFC001FFFFF007FFFF80FFFFFC,000000000FFFFFFFFF
+FFFFC001FFFFF007FFFF80FFFFFC,000000000FFFFFFFFFFFFFE001FFFFE00FFFFF80FFFFF8,00
+0000001FFFFFFFFFFFFFC001FFFFC00FFFFF01FFFFF8,000000001FFFFFFFFFFFFFE003FFFFE00F
+FFFF03FFFFF8,000000001FFFFFFFFFFFFFE003FFFFC01FFFFF01FFFFF0,000000003FFFFFFFFF
+FFFFE007FFFFC01FFFFE03FFFFF0,000000003FFFFFFFFFFFFFE007FFFF801FFFFE03FFFFE0,00
+0000003FFFFFFFFFFFFFE00FFFFF803FFFFE07FFFFE0,000000007FFFFFFFFFFFFFF00FFFFF003F
+FFFC07FFFFC0,000000007FFFFFFFFFFFFFE00FFFFF807FFFFC0FFFFFC0,000000007FFFFFFFFF
+FFFFF01FFFFF007FFFFC0FFFFFC0,00000000FFFFFFFFFFFFFFE01FFFFE007FFFF80FFFFF80,00
+00000000000000007FFFF01FFFFE007FFFF81FFFFF80,000000000000000000FFFFE03FFFFE88FF
+FFF81FFFFF80,0000000000000000007FFFE03FFFFFFFFFFFF01FFFFF,000000000000000000FF
+FFE03FFFFFFFFFFFF03FFFFF,000000000005555000FFFFC07FFFFFFFFFFFE03FFFFF,00000000
+001FFFFE01FFFFC07FFFFFFFFFFFE03FFFFE,00000000001FFFFE01FFFFC07FFFFFFFFFFFC07FFF
+FE,00000000003FFFFE03FFFF80FFFFFFFFFFFFE07FFFFE,00000000003FFFFC03FFFF80FFFFFF
+FFFFFFC07FFFFC,00000000003FFFFC03FFFF80FFFFFFFFFFFF80FFFFFC,00000000007FFFFC07
+FFFF01FFFFFFFFFFFF80FFFFFC,00000000007FFFF807FFFF03FFFFFFFFFFFF80FFFFF8,000000
+00007FFFF807FFFF01FFFFFFFFFFFF01FFFFF8,0000000000FFFFF80FFFFE03FFFFFFFFFFFF01FF
+FFF8,0000000000FFFFF00FFFFE03FFFFFFFFFFFF01FFFFF0,0000000000FFFFF00FFFFE07FFFF
+FFFFFFFE03FFFFF0,0000000001FFFFF00FFFFC07FFFFFFFFFFFE03FFFFE0,0000000001FFFFE0
+0EEEEC0EEEEEEEEEEEEE02EEEEE0,0000000001FFFFC0,0000000003FFFFE00000020000000000
+0002,0000000003FFFFC0,0000000007FFFFC0,0000000007FFFFE0,FFFFFFFF8FFFFFFFFFFFF0
+3FFFFE00FFFFF81FFFFFFFFFFFC7FFFFFEFFFFFFFF07FFFFFFFFFFE03FFFFC00FFFFF01FFFFFFF
+FFFF87FFFFFEFFFFFFFF0FFFFFFFFFFFE03FFFFC01FFFFF03FFFFFFFFFFF8FFFFFFEFFFFFFFF0F
+FFFFFFFFFFC07FFFFC01FFFFE03FFFFFFFFFFF0FFFFFFE222222221FFFFFFFFFFFC07FFFF803FF
+FFE23FFFFFFFFFFF22222222000000001FFFFFFFFFFFC07FFFF803FFFFC07FFFFFFFFFFF,000000
+003FFFFFFFFFFF80FFFFF803FFFFC07FFFFFFFFFFE,000000003FFFFFFFFFFF00FFFFF007FFFFC0
+7FFFFFFFFFFE,FFFFFFFC3FFFFFFFFFFF20FFFFF007FFFF80FFFFFFFFFFFE3FFFFFFEFFFFFFFC7F
+FFFFFFFFFF01FFFFF007FFFF807FFFFFFFFFFC3FFFFFFEFFFFFFF87FFFFFFFFFFE01FFFFE00FFF
+FF80FFFFFFFFFFFC3FFFFFFEFFFFFFF87FFFFFFFFFFC01FFFFE00FFFFF00FFFFFFFFFFFC7FFFFF
+FEFFFFFFF8FFFFFFFFFFF803FFFFE00FFFFF00FFFFFFFFFFF87FFFFFFE00000000FFFFFFFFFFF0
+03FFFFC01FFFFF007FFFFFFFFFF8,00000000FFFFFFFFFFF007FFFFC01FFFFE00FFFFFFFFFFF8,00
+000001FFFFFFFFFFE007FFFFC01FFFFE007FFFFFFFFFF0,BBBBBBA1FFFFFFFFFFE00FFFFF803FFF
+FE007FFFFFFFFFF0BBBBBBBAFFFFFFE1FFFFFFFFFF8007FFFF003FFFFC003FFFFFFFFFF1FFFFFF
+FEFFFFFFE3FFFFFFFFFF000FFFFF803FFFFC001FFFFFFFFFE1FFFFFFFEFFFFFFC3FFFFFFFFFC00
+0FFFFF007FFFFC0007FFFFFFFFC1FFFFFFFEFFFFFF83FFFFFFFFE0001FFFFF02FFFFF80003FFFF
+FFFFE3FFFFFFFE00,
+
+<script>
+
+if Shipment.Addresses("RECEIVER").ISOcountry = "DE" or Shipment.Addresses("RETURNTO").ISOcountry = "DE" then
+
+if parcel.weight >= "20" then
+
+return "^FO700,605^GFA,1105,1105,13,O0LFE,N01MF,N03MF8,N03FFC03FFC,N07FFI0FFE,N0FFCI07FF,N0FF8I03FF,M01FFJ01FF8,M01FEK0FF8,M03FEK07FC,M03FCK07FC,M03FCK03FC,M03FCK03FE,M07F8K03FE,M07F8K01FE,:::K0CCFFCK07FF82C,J07UFE,J0VFE,J0WF,::::I01FFC7JFCNF,I01FC007FFC00MF,I01F8003FFI07LF8,I01EI01FEI03LF8,I01CJ0FEI01LF8,I01CJ0FCI01FFE0FF8,I01EJ0FCJ0FFE07F8,I03E0700780300FFE07F8,I03F9F80780780FFE07F8,I03IFC0780FC0FFE07F8,I03IFC0780FC07FE07FC,I03IF80780FC07FE07FC,I03IF00F00FC078I03E,:I07FFE01F00FC078I01E,I07FFC01F00FC078I01E,I07FF803F00FC078I01E,I07FF007F00FC078I03E,I07FE00FF00FC07FE07FE,I07FC01FF80FC07FE07FF,I07F803FF80FC07FE07FF,I0FF007FF80F80FFE07FF,I0FE007FF80780FFE07FF,I0FEJ07C0300FFE07FF,I0FEJ07CI01FFE0IF,I0FEJ07CI01MF,001FEJ07EI03MF8,001FEJ07FI03MF8,001FEJ07F800NF8,001OF03NF8,001YF8,003YF8,:003LFE3QF8,003LFE1QFC,::003LFE18F00MFC,007LFE10E00MFC,007LFE00E00MFC,007LFE01E10MFE,007LFE01E38MFE,:007LFE01E38NF,007LFE00E10NF,007LFE10E00NF,00MFE10700NF,00MFE38780NF,00RF0NF,00QF00NF,00QF01NF,00QF03NF8,00QF8OF8,01gGF8,:,:::^FS"
+
+end if
+
+if parcel.weight >= "10" then
+
+return "^FO700,605^GFA,1232,1232,14,Q03JFC,Q0KFE,P01LF8,P07LFC,P0MFE,P0NF,O01FFE00IF8,O03FF8003FF8,O03FFI01FFC,O07FEJ0FFE,O07FCJ07FE,O0FF8J03FF,O0FF8J01FF,O0FFK01FF,N01FFL0FF,N01FEL0FF8,:::N01FEL07F8,K03VFC,K07VFE,::K0WFE,K0F8T03E,K0F8T01E,K0FU01F,::K0F098J0FFL01F,J01JF8003FFCK01F,J01JF8007FFEK01F,J01JF800JFL0F,J01E7FF801JFL0F,J01E7FF801JF800FC0F8,J01E3FF801FE7F800FC0F8,J01E07F803FC3F800FC0F8,J01E07F803FC1FC00FC0F8,J03E07F803F81FC00FC0F8,J03E07F803F81FC00FC078,J03C07F803F81FC00FE07C,J03C07F803F81FC3JF7C,::J07C07F803F81FC3JF7E,J07C07F803F81FC3JF3E,J07C07F803F81FC01FE03E,J07807F803F81FC00FC03E,:J0F807F803FC1FC00FC03E,J0F807F803FC3FC00FC01E,J0F83IF01FE7F800FC01F,J0F87IF81JF800FC01F,J0F87IF81JFL01F,J0F07IF80JFL01F,J0F07IF807FFEL01F,I01F07IF803FFCL01F,I01F07IF801FF8M0F,I01FX0F8,::I01EX0F8,:I03EL0EQ0F8,I03EL0FQ07C,::I03EL0F3C3F8L07C,I03CL0F7C7FCL07C,I07CL0FF8FFCL07C,I07CL0FF0F3CL03E,:::I0FCL0FF8F3CL03E,I0F8L0FF8FFCL01E,I0F8L0F7C7FCL01E,I0F8L0F3C7FCL01F,I0F8L0E3E03CL01F,I0F8P03CL01F,001FP02F8L01F,001FP07F8L01F,001gHF,:001gHF8,:001gHF,^FS"
+
+end if
+
+end if
+
+</script>
+
+<script>
+dim sServiceDescDHL
+if Shipment.Attributes("DHL_PRODUCT_NAME") <> "" then
+	sServiceDescDHL = Shipment.Attributes("DHL_PRODUCT_NAME")
+else
+	sServiceDescDHL = Shipment.CarrierService.FreeText3
+end if
+
+return "^FO50,20^A0N,40,30^FD" & sServiceDescDHL.ToUpper & "^FS"
+</script>
+
+
+^FO50,65^A0N,15,15^FDCentiro Systems v1,1 / <script>
+if Shipment.Shipdate > Shipment.cr_time_db
+	return DatePart("yyyy",shipment.shipdate) & "-" & right("0" & DatePart("m",shipment.shipdate),2) & "-" & right("0" & DatePart("d",shipment.shipdate),2)
+else
+	return DatePart("yyyy",shipment.cr_time_db) & "-" & right("0" & DatePart("m",shipment.cr_time_db),2) & "-" & right("0" & DatePart("d",shipment.cr_time_db),2)
+end if
+</script> / 14-1405^FS
+
+^FO395,0^GB174,82,2^FS
+
+<script>
+dim sServiceCodeDHL
+if Shipment.Attributes("DHL_CONTENT_CODE") <> "" then
+	sServiceCodeDHL = Shipment.Attributes("DHL_CONTENT_CODE")
+else
+	sServiceCodeDHL = Shipment.CarrierService.DeliveryInstruction
+end if
+
+return "^FO420,20^FR^A0N,60,60^FD" & sServiceCodeDHL.ToUpper & "^FS"
+</script>
+
+<script>
+dim customs = "false"
+
+if Shipment.Carrierservice.description.indexOf("non-doc") > 0 then
+	customs = "true"
+else
+	customs = "false"
+end if
+
+if customs = "true" or Shipment.Attributes("DHL_CONTENT_VIDEO") = "Y" then
+	return "^FO397,2^FR^GB172,78,78^FS"
+end if
+</script>
+
+^FO0,80^GB800,2,2^FS
+
+^FO8,88^A0N,22,25^FDFROM:^FS
+<script>
+dim sCrLf = chr(13) & chr(10)
+dim sSenderAddressString = ""
+dim sSenderName = Shipment.Sender.Name
+dim sSenderAddr1 = Shipment.Sender.Address1
+dim sSenderAddr2 = Shipment.Sender.Address2
+dim sSenderZipCode = Shipment.Sender.ZipCode
+dim sSenderCity = Shipment.Sender.City
+dim sSenderCountryDescription = Shipment.Sender.Country.Description
+
+dim sSenderLine1 = ""
+dim sSenderLine2 = ""
+dim sSenderLine3 = ""
+dim sSenderLine4 = ""
+dim sSenderLine5 = ""
+
+if Shipment.Addresses("RETURNTO").Name <> "" then
+	sSenderName = Shipment.Addresses("RETURNTO").Name
+	sSenderAddr1 = Shipment.Addresses("RETURNTO").Address1
+	sSenderAddr2 = Shipment.Addresses("RETURNTO").Address2
+	sSenderZipCode = Shipment.Addresses("RETURNTO").ZipCode
+	sSenderCity = Shipment.Addresses("RETURNTO").City
+	sSenderCountryDescription = Shipment.Addresses("RETURNTO").Country.Description
+
+else if Shipment.Addresses("PICKUP").Name <> "" then
+	sSenderName = Shipment.Addresses("PICKUP").Name
+	sSenderAddr1 = Shipment.Addresses("PICKUP").Address1
+	sSenderAddr2 = Shipment.Addresses("PICKUP").Address2
+	sSenderZipCode = Shipment.Addresses("PICKUP").ZipCode
+	sSenderCity = Shipment.Addresses("PICKUP").City
+	sSenderCountryDescription = Shipment.Addresses("PICKUP").Country.Description
+
+else if Shipment.Addresses("SENDER").Name <> "" then
+	sSenderName = Shipment.Addresses("SENDER").Name
+	sSenderAddr1 = Shipment.Addresses("SENDER").Address1
+	sSenderAddr2 = Shipment.Addresses("SENDER").Address2
+	sSenderZipCode = Shipment.Addresses("SENDER").ZipCode
+	sSenderCity = Shipment.Addresses("SENDER").City
+	sSenderCountryDescription = Shipment.Addresses("SENDER").Country.Description
+end if
+
+sSenderAddressString = left(sSenderName,35) & "|" & left(sSenderAddr1,35) & "|" & left(sSenderAddr2,35) & "|" & left(sSenderZipCode & " " & sSenderCity,35) & "|" & left(sSenderCountryDescription.ToUpper,35)
+
+sSenderAddressString = replace(replace(sSenderAddressString,"||", "|"),"||", "|")
+
+dim myarray As string()
+
+myarray = Split(sSenderAddressString, "|")
+
+dim arraycount
+arraycount = myarray.length
+
+if arraycount > 0 then
+	sSenderLine1 = myarray(0)
+end if
+
+if arraycount > 1 then
+	sSenderLine2  = myarray(1)
+end if
+
+if arraycount > 2 then
+	sSenderLine3 = myarray(2)
+end if
+
+if arraycount > 3 then
+	sSenderLine4 = myarray(3)
+end if
+
+if arraycount > 4 then
+	sSenderLine5 = myarray(4)
+end if
+
+return "^FO80,88^A0N,22,22^FD" & sSenderLine1 & "^FS" & sCrLf & "^FO80,110^A0N,22,22^FD" & sSenderLine2 & "^FS" & sCrLf & "^FO80,132^A0N,22,22^FD" & sSenderLine3 & "^FS" & sCrLf & "^FO80,154^A0N,22,22^FD" & sSenderLine4 & "^FS" & sCrLf & "^FO80,176^A0N,22,22^FD" & sSenderLine5 & "^FS"
+</script>
+
+<script>
+dim sCrLf = chr(13) & chr(10)
+dim sSenderContact = Shipment.Sender.Reference
+dim sSenderContactOutput = ""
+
+if Shipment.Addresses("PICKUP").Name <> "" then
+sSenderContact = Shipment.Addresses("PICKUP").Contact
+
+else if Shipment.Addresses("SENDER").Name <> "" then
+	sSenderContact = Shipment.Addresses("SENDER").Contact
+end if
+
+if sSenderContact <> "" then
+	sSenderContactOutput = "^FO450,88^A0N,22,22^FDContact:^FS" & sCrLf & "^FO450,110^A0N,22,22^FD" & left(sSenderContact,25) & "^FS" 
+end if
+
+
+return sSenderContactOutput
+</script>
+
+^FO700,90^A0N,15,15^FDOrigin:^FS
+<script>
+dim sDepot
+if Shipment.Attributes("DHL_ORG_SRVA_CODE") <> "" then
+	sDepot = Shipment.Attributes("DHL_ORG_SRVA_CODE")
+else
+	sDepot = Shipment.Sender.Attributes(Shipment.CodeCAR)("DEPOT")
+end if
+
+return "^FO697,110^A0N,50,50^FD" & sDepot.ToUpper & "^FS"
+</script>
+
+^FO0,200^GB32,0,6^FS
+^FO0,200^GB0,32,6^FS
+
+^FO760,200^GB32,0,6^FS
+^FO792,200^GB0,32,6^FS
+
+^FO0,368^GB32,0,6^FS
+^FO0,342^GB0,32,6^FS
+
+^FO760,368^GB32,0,6^FS
+^FO792,342^GB0,32,6^FS
+
+^FO0,196^GB800,2,2^FS
+
+^FO8,210^A0N,22,25^FDTO:^FS
+<script>
+dim sCrLf = chr(13) & chr(10)
+dim sReceiverAddressString = ""
+dim sReceiverName = Shipment.Receiver.Name
+dim sReceiverAddr1 = Shipment.Receiver.Address1
+dim sReceiverAddr2 = Shipment.Receiver.Address2
+dim sReceiverAddr3 = Shipment.Receiver.Address3
+dim sReceiverZipCode = Shipment.Receiver.ZipCode
+dim sReceiverCity = Shipment.Receiver.City
+
+dim sReceiverLine1 = ""
+dim sReceiverLine2 = ""
+dim sReceiverLine3 = ""
+dim sReceiverLine4 = ""
+
+if Shipment.Addresses("RECEIVER").Name <> "" then
+	sReceiverName = Shipment.Addresses("RECEIVER").Name
+	sReceiverAddr1 = Shipment.Addresses("RECEIVER").Address1
+	sReceiverAddr2 = Shipment.Addresses("RECEIVER").Address2
+	sReceiverAddr3 = Shipment.Addresses("RECEIVER").Address3
+	sReceiverZipCode = Shipment.Addresses("RECEIVER").ZipCode
+	sReceiverCity = Shipment.Addresses("RECEIVER").City
+end if
+
+sReceiverAddressString = left(sReceiverName,35) & "|" & left(sReceiverAddr1,35) & "|" & left(sReceiverAddr2,35) & "|" & left(sReceiverAddr3,35)
+
+sReceiverAddressString = replace(replace(sReceiverAddressString,"||", "|"),"||", "|")
+
+dim myarray As string()
+myarray = Split(sReceiverAddressString, "|")
+
+Dim arraycount
+arraycount = myarray.length
+
+if arraycount > 0 then
+	sReceiverLine1 = myarray(0)
+end if
+
+if arraycount > 1 then
+	sReceiverLine2  = myarray(1)
+end if
+
+if arraycount > 2 then
+	sReceiverLine3 = myarray(2)
+end if
+
+if arraycount > 3 then
+	sReceiverLine4 = myarray(3)
+end if
+
+return "^FO80,205^A0N,23,26^FD" & sReceiverLine1 & "^FS" & sCrLf & "^FO80,230^A0N,23,26^FD" & sReceiverLine2 & "^FS" & sCrLf & "^FO80,255^A0N,23,26^FD" & sReceiverLine3 & "^FS" & sCrLf & "^FO80,280^A0N,23,26^FD" & sReceiverLine4 & "^FS"
+</script>
+
+<script>
+dim sCrLf = chr(13) & chr(10)
+dim sReceiverZipCode = Shipment.Receiver.ZipCode
+dim sReceiverCity = Shipment.Receiver.City
+dim sReceiverState = Shipment.Receiver.State
+dim sReceiverCountryDescription = Shipment.Receiver.Country.Description
+dim sReceiverISOCountry = Shipment.Receiver.ISOCountry
+dim sReceiverOutLine1 = ""
+dim sReceiverOutLine2 = ""
+
+if Shipment.Addresses("RECEIVER").Name <> "" then
+	sReceiverZipCode = Shipment.Addresses("RECEIVER").ZipCode
+	sReceiverCity = Shipment.Addresses("RECEIVER").City
+	sReceiverState = Shipment.Addresses("RECEIVER").State
+	sReceiverCountryDescription = Shipment.Addresses("RECEIVER").Country.Description
+	sReceiverISOCountry = Shipment.Addresses("RECEIVER").ISOCountry
+end if
+
+if Shipment.Attributes("DHL_DEST_POSTCODE") <> "" then
+	sReceiverZipCode = Shipment.Attributes("DHL_DEST_POSTCODE")
+	sReceiverCity = Shipment.Addresses("RECEIVER").City
+	sReceiverState = Shipment.Addresses("RECEIVER").State
+	sReceiverCountryDescription = Shipment.Attributes("DHL_DEST_COUNTRY_NAME")
+	sReceiverISOCountry = Shipment.Addresses("RECEIVER").ISOCountry
+end if
+
+if sReceiverISOCountry.ToUpper = "US" OR sReceiverISOCountry.ToUpper = "CA" then
+	sReceiverOutLine1 = sReceiverCity & " " & sReceiverState & " " & sReceiverZipCode
+	sReceiverOutLine2 = sReceiverCountryDescription
+else
+	sReceiverOutLine1 = sReceiverZipCode & " " & sReceiverCity
+	sReceiverOutLine2 = sReceiverCountryDescription
+end if
+
+return "^FO80,315^A0N,32,34^FD" & sReceiverOutLine1 & "^FS" & sCrLf & "^FO80,345^A0N,32,34^FD" & sReceiverOutLine2.ToUpper & "^FS"
+</script>
+
+<script>
+dim sCrLf = chr(13) & chr(10)
+dim sReceiverContact = Shipment.Receiver.Reference
+dim sReceiverPhone = Shipment.Receiver.Phone
+dim sReceiverContactOutput = ""
+dim sReceiverPhoneOutput = ""
+
+if Shipment.Addresses("RECEIVER").Name <> "" then
+	sReceiverContact = Shipment.Addresses("RECEIVER").Contact
+	
+end if
+
+if sReceiverContact <> "" then
+	sReceiverContactOutput = "^FO525,205^A0N,22,23^FDContact:^FS" & sCrLf & "^FO525,230^A0N,22,23^FD" & left(sReceiverContact,25) & "^FS"
+end if
+
+
+return sReceiverContactOutput 
+</script>
+
+^FO0,376^GB800,2,2^FS
+
+^FO8,390^A0N,60,50^FD<script>
+if Shipment.Attributes("DHL_ROUT_OUTBOUND")<> "" then
+return Shipment.Attributes("DHL_ROUT_OUTBOUND")
+ else
+return "."
+end if
+</script>^FS
+
+<script>
+dim sRouteCode
+
+if Shipment.Attributes("DHL_CONTENT_CODE") <> "" then
+	sRouteCode = Shipment.Attributes("DHL_DEST_COUNTRY_CODE") & "-" & Shipment.Attributes("DHL_DEST_SRVA_CODE") & "-" & Shipment.Attributes("DHL_DEST_FAC_CODE")
+else
+	sRouteCode = Shipment.Receiver.ISOCountry & "-" & Shipment.Routing1 & "-" & Shipment.Routing2
+end if
+
+return "^FO160,390^A0N,70,70^FD" & sRouteCode & "^FS"
+</script>
+
+^FO652,390^A0N,60,60^FD<script>
+if Shipment.Attributes("DHL_ROUT_INBOUND")<> "" then
+return Shipment.Attributes("DHL_ROUT_INBOUND")
+ else
+return "."
+end if
+</script>^FS
+
+^FO0,456^GB800,2,2^FS
+
+^FO0,458^FR^GB500,62,50^FS
+
+^FO08,578^A0N,25,15^FD<script>
+dim sAttributes = ""
+if Shipment.IsSelectedServiceAttribute("HD") then
+	sAttributes = sAttributes & "LITHIUM ION BATTERIES IN COMPLIANCE WITH SECTION II OF PI966" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HV") then
+	sAttributes = sAttributes & "LITHIUM ION BATTERIES IN COMPLIANCE WITH SECTION II OF PI967" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HM") then
+	sAttributes = sAttributes & "LITHIUM METAL BATTERIES IN COMPLIANCE WITH SECTION II OF PI969" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HH") then
+	sAttributes = sAttributes & "DANGEROUS GOODS IN EXCEPTED QUANTITIES" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("LQ") then
+	sAttributes = sAttributes & "LIMITED QUANTITIES ROAD ONLY" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HY") then
+	sAttributes = sAttributes & "UN3245 GMO/GMMO" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HE") and Shipment.Attributes("DNG_AIRCRAFT") = "PAX" then
+	sAttributes = sAttributes & "DANGEROUS GOODS AS PER ASSOCIATED DGD " & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HE") and Shipment.Attributes("DNG_AIRCRAFT") <> "PAX" then
+	sAttributes = sAttributes & "DANGEROUS GOODS AS PER ASSOCIATED DGD - CAO" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HW") then
+	sAttributes = sAttributes & "LITHIUM METAL BATTERIES IN COMPLIANCE WITH SECTION II OF PI970" & "-"
+end if
+
+dim sLength = CInt(Len(sAttributes))
+if sLength > 1 then
+	return left(sAttributes,sLength-1)
+	end if
+</script>^FS
+
+^FO8,466^A0N,60,60^FR^FD<script>
+dim customs = "false"
+
+
+if Shipment.Carrierservice.description.indexOf("non-doc") > 0 then
+	customs = "true"
+else
+	customs = "false"
+end if
+
+if Shipment.Attributes("DHL_CODE_ON_LABEL") <> "" then
+	return Shipment.Attributes("DHL_CODE_ON_LABEL")
+else 
+	dim sAttributes = ""
+
+if customs = "true" then 
+	sAttributes = sAttributes & "C" & "-"
+else
+	sAttributes = sAttributes 
+end if
+
+dim sservicecode = "false"
+if Shipment.CodeCSE = "WMX" or Shipment.CodeCSE = "WPX" or Shipment.CodeCSE = "TDY" or Shipment.CodeCSE = "TDE" or Shipment.CodeCSE = "ESI" or Shipment.CodeCSE = "FRT" or Shipment.CodeCSE = "TDM" or Shipment.CodeCSE = "EPP" then
+sservicecode = "true"
+end if
+
+if Shipment.Attributes("TermsOfDelivery") = "DDP" and sservicecode = "true" then
+	sAttributes = sAttributes & "DTP" & "-"
+else if Shipment.IsSelectedServiceAttribute("DTP") then
+	sAttributes = sAttributes & "DTP" & "-"
+
+end if
+
+if Shipment.TranspPayer = "C" then
+	sAttributes = sAttributes & "ExW" & "-"
+end if
+
+if Shipment.IsSelectedServiceAttribute("hold") then
+	sAttributes = sAttributes & "H" & "-"
+end if
+
+if Shipment.IsSelectedServiceAttribute("LX") then
+	sAttributes = sAttributes & "HFC" & "-"
+end if
+
+if Shipment.IsSelectedServiceAttribute("cod") then
+	sAttributes = sAttributes & "C.O.D." & "-"
+end if
+
+if Shipment.IsSelectedServiceAttribute("nds") then
+	sAttributes = sAttributes & "NDS" & "-"
+end if
+
+if Shipment.IsSelectedServiceAttribute("sat") then
+	sAttributes = sAttributes & "SAT" & "-"
+end if
+
+if Shipment.IsSelectedServiceAttribute("bbm") then
+	sAttributes = sAttributes & "BBM" & "-"
+end if
+
+if Shipment.IsSelectedServiceAttribute("rss") then
+	sAttributes = sAttributes & "RSS" & "-"
+end if
+
+if Shipment.Attributes("PLTPROFORMA").ToUpper()="TRUE" then
+	sAttributes = sAttributes & "PLT" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HC") then
+                          sAttributes = sAttributes & "ICE" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("PT") OR Shipment.IsSelectedServiceAttribute("PU") OR Shipment.IsSelectedServiceAttribute("803") then
+                          sAttributes = sAttributes & "RET" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HH") then
+	sAttributes = sAttributes & "REQ" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("LQ") then
+	sAttributes = sAttributes & "ADR" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HY") then
+	sAttributes = sAttributes & "RDS" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HE") then
+	sAttributes = sAttributes & "HAZ" & "-"
+end if
+if Shipment.IsSelectedServiceAttribute("HW") then
+	sAttributes = sAttributes & "ELM" & "-"
+end if
+
+
+
+dim sLength = CInt(Len(sAttributes))
+if sLength > 1 then
+	return left(sAttributes,sLength-1)
+	end if
+end if
+</script>^FS
+
+^FO600,460^A0N,18,17^FDDay^FS
+^FO610,480^A0N,40,40^FD<script>
+if Shipment.Attributes("DHL_DELV_DAY") <> "" then
+	return Shipment.Attributes("DHL_DELV_DAY")
+else if Shipment.isSelectedServiceAttribute("sat") then 
+	return "S"
+else
+	return ""
+end if
+</script>^FS
+
+^FO700,460^A0N,18,17^FDTime^FS
+^FO710,480^A0N,40,40^FD<script>
+if Shipment.Attributes("DHL_DELV_TIME") <> "" then
+	return Shipment.Attributes("DHL_DELV_TIME")
+else if Shipment.CodeCSE.toupper = "TDE" OR Shipment.CodeCSE.toupper = "TDK" OR Shipment.CodeCSE.toupper = "DOK" then
+	return "X09"
+else if Shipment.CodeCSE.toupper = "TDT" OR Shipment.CodeCSE.toupper = "TDY" OR Shipment.CodeCSE.toupper = "DOT" then
+	return "X12"
+else
+	return ""
+end if
+</script>^FS
+
+^FO0,520^GB800,2,2^FS
+
+
+^FO8,530^A0N,18,17^FDRef code:^FS
+^FO110,530^A0N,22,23^FD<script>
+dim sSenRef
+
+if Shipment.Attributes("SENDERREFERENCE1") <> "" then
+	sSenRef = Shipment.Attributes("SENDERREFERENCE1")
+else if Shipment.OrderNo <> "" then
+	sSenRef = Shipment.OrderNo
+else if Shipment.Reference <> "" then
+	sSenRef = Shipment.Reference
+end if
+
+return sSenRef
+</script>^FS
+
+^FO8,608^A0N,20,20^FD<script>
+if Shipment.Sender.ISOCountry = "US" and Shipment.Attributes("ExportComplianceStatement") = "" then
+	return "NOEEI Sec. 30.37(a)"
+else
+	return Shipment.Attributes("ExportComplianceStatement")
+end if
+</script>^FS
+
+
+^FO480,527^A0N,18,17^FDPackage / Shipment Weight:^FS
+^FO480,547^A0N,30,25^FD <script>
+if Shipment.Sender.ISOCountry.ToUpper = "US" then
+	return Parcel.WeightInLBS.ToString("0.0") & " / " & Shipment.WeightInLBS.ToString("0.0") & " lbs"
+else 
+	return Parcel.Weight.ToString("0.0") &  " / " & Shipment.Weight.ToString("0.0") &  " kg"
+end if
+</script>^FS
+
+^FO690,527^A0N,18,17^FDPiece:^FS
+^FO685,550^A0N,54,60^FD<Parcel.NumberOfParcels>^FS
+
+^FO0,604^GB800,2,2^FS
+
+^FO50,697^BY3,2.7^B3N,N,190,N,N^FD<Shipment.SequenceNo>^FS
+^FO670,697^A0N,24,18^FDContent:^FS
+
+<script>
+Dim str As String = Parcel.TypeOfGoods
+
+str = Replace(str, "^","")    
+Dim chunkSize As Integer = 10
+   
+ Dim stringLength As Integer = str.Length
+    
+Dim i As Integer = 0
+
+Dim toReturn = ""
+
+Dim rowHeight = 1
+
+Dim counter = 0
+   
+ While i < stringLength
+       
+ If i + chunkSize > stringLength Then chunkSize = stringLength - i
+       
+counter = counter + 26   
+ If counter = 3 then
+       
+Console.WriteLine(str.Length)
+       
+Console.WriteLine(chunkSize)
+       
+Console.WriteLine(i)
+          
+ toReturn &= "^FO685," & (722 + counter) + rowHeight & "^A0N,26,20^FD" & str.Substring(i, str.Length - i) & "^FS"
+       
+ exit while
+      
+ end if
+       
+ toReturn &= "^FO685," & (722 + counter) + rowHeight & "^A0N,26,20^FD" & str.Substring(i, chunkSize) & "^FS"
+     
+        
+i += chunkSize
+    
+End While
+
+return toReturn
+</script>
+
+
+
+^FO30,628^A0N,18,17^FD<script>
+if Shipment.Sender.ISOCountry.ToUpper = "US" then
+	return "These commodities, technology, or software were exported from the United States in accordance" 
+else 
+	return ""
+end if
+</script>^FS
+
+^FO30,648^A0N,18,17^FD<script>
+if Shipment.Sender.ISOCountry.ToUpper = "US" then
+	return "with the Export Administration Regulations. Diversion contrary to U.S law is prohibited." 
+else 
+	return ""
+end if
+</script>^FS
+
+<script>
+if Shipment.CodeCSE.ToUpper = "BBX" then
+	return "^FO630,780^A0N,26,20^FDCleared^FS" & "^FO630,805^A0N,26,20^FDunder waybill:^FS" & "^FO630,835^A0N,30,30^FD" & Shipment.MasterSeqNo & "^FS"  
+end if
+</script>
+
+^FO120,900^A0N,25,25^FDWAYBILL:^FS
+^FO320,900^A0N,25,25^FD<script>
+	return mid(Shipment.SequenceNo,1,2) & " " & mid(Shipment.SequenceNo,3,4) & " " & mid(Shipment.SequenceNo,7,4)
+</script>^FS
+
+<script>
+dim customs = "false"
+
+if Shipment.Carrierservice.description.indexOf("non-doc") > 0 then
+	customs = "true"
+else
+	customs = "false"
+end if
+
+if Shipment.Attributes("DHL_ROUTING_CODE_DATA_INDENTIFIER") <> "" then
+	dim sRoutingBarcodeDHL = "^BY3^FO50,926^BCN,205,N,N,N,A^FD" & Shipment.Attributes("DHL_ROUTING_CODE_DATA_INDENTIFIER") & Shipment.Attributes("DHL_ROUTING_CODE_TEXT") & "^FS"
+	dim sRoutingTextDHL = "^FO260,1137^A0N,20,21^FD" & "(" & Shipment.Attributes("DHL_ROUTING_CODE_DATA_INDENTIFIER") & ")" & Shipment.Attributes("DHL_ROUTING_CODE_TEXT") & "^FS"
+	return  sRoutingBarcodeDHL &  sRoutingTextDHL
+else 
+	dim iAttributeValue = "0"
+	dim sAttributeValue = "000"
+	dim sRoutingBarcode = ""
+	dim sRoutingBarcodeText = ""
+	dim sRoutingTime = "0"
+
+if customs = "true" then
+	iAttributeValue = iAttributeValue + 1
+else
+	iAttributeValue = iAttributeValue
+end if
+
+if Shipment.IsSelectedServiceAttribute("cod") then
+	iAttributeValue = iAttributeValue + 2
+end if
+
+if Shipment.TranspPayer = "C" then
+	iAttributeValue = iAttributeValue + 4
+end if
+
+
+if Shipment.IsSelectedServiceAttribute("bbm") then
+	iAttributeValue = iAttributeValue + 16
+end if
+
+if Shipment.CodeCSE.ToUpper = "TDE" OR Shipment.CodeCSE.ToUpper = "TDK" OR Shipment.CodeCSE.ToUpper = "DOK" then
+	sRoutingTime = "1"
+end if
+
+if Shipment.CodeCSE.ToUpper = "TDT" OR Shipment.CodeCSE.ToUpper = "TDY" OR Shipment.CodeCSE.ToUpper = "DOT" then
+	sRoutingTime = "2"
+else if Shipment.Receiver.ISOCountry = "IE" then
+	sAttributeValue = Right("000" & iAttributeValue,3)
+	sRoutingBarcode = "^BY3^FO50,926^BCN,205,N,N,N,A^FD" & "2L" & Shipment.receiver.ISOCountry & Shipment.Routing1 & Shipment.Routing2 & "+" & Shipment.Carrierservice.FreeText2 & "00" & sRoutingTime & sAttributeValue & "^FS"
+	sRoutingBarcodeText = "^FO260,1137^A0N,20,21^FD" & "(2L)" & Shipment.receiver.ISOCountry & Shipment.Routing1 & Shipment.Routing2 & "+" & Shipment.Carrierservice.FreeText2 & "00" & sRoutingTime & sAttributeValue & "^FS"
+	return  sRoutingBarcode & chr(13) & chr(10) & sRoutingBarcodeText
+end if
+	sAttributeValue = Right("000" & iAttributeValue,3)
+	sRoutingBarcode = "^BY3^FO50,926^BCN,205,N,N,N,A^FD" & "2L" & Shipment.receiver.ISOCountry & replace(Shipment.Receiver.ZipCode," ","") & "+" & Shipment.Carrierservice.FreeText2 & "00" & sRoutingTime & sAttributeValue & "^FS"
+	sRoutingBarcodeText = "^FO260,1137^A0N,20,21^FD" & "(2L)" & Shipment.receiver.ISOCountry & replace(Shipment.Receiver.ZipCode," ","") & "+" & Shipment.Carrierservice.FreeText2 & "00" & sRoutingTime & sAttributeValue & "^FS"
+	return  sRoutingBarcode & chr(13) & chr(10) & sRoutingBarcodeText
+end if
+</script>
+
+^BY4^FO50,1168^BCN,205,N,N,Y^FD>;>8<Parcel.SequenceNoSSCC>^FS
+
+^FO230,1386^A0N,20,21^FD<script>
+	return "(" & mid(Parcel.SequenceNoSSCC,1,2) & ")" & mid(Parcel.SequenceNoSSCC,3,8) & " " & mid(Parcel.SequenceNoSSCC,11,9) & " " & mid(Parcel.SequenceNoSSCC,20,1)
+</script>^FS
+
+<script>
+if shipment.status = "99" then
+	return "^FO6,752^A0N,270,270^FDERROR^FS" 
+else 
+	return "" 
+end if
+</script>
+
+^FO0,400^A0N,100,70^FD<script>
+if Shipment.Status = "99" then
+	return Shipment.Routingerror
+end if
+</script>^FS
+
+
+<SubLabelTemplate>
+
+^PQ1
+^CI0
+^XZ
+
+<script>
+dim sDHLDutiable
+dim sDHLArchivelabel
+
+if Shipment.Attributes("DHL_DUTIABLE") <> "" then
+	sDHLDutiable = Shipment.Attributes("DHL_DUTIABLE").ToUpper
+end if
+
+if sDHLDutiable = "TRUE" and labelindex = labelcount and Shipment.Sender.Attributes(Shipment.CodeCAR)("ARCHIVELABEL").ToUpper = "TRUE" then
+	return "^XA" 
+else
+	return ""
+end if
+</script>
+
+^PR6    
+^LH10,10
+^CI27
+
+^FO575,14^XGDHLLOGO.GRF,1,1^FS
+
+^FO70,10^A0N,50,40^FD* ARCHIVE DOC *^FS
+^FO70,55^A0N,25,22^FDNot to be attached to package^FS
+
+^FO395,0^GB174,82,2^FS
+
+<script>
+dim sServiceCodeDHL
+if Shipment.Attributes("DHL_CONTENT_CODE") <> "" then
+	sServiceCodeDHL = Shipment.Attributes("DHL_CONTENT_CODE")
+else
+	sServiceCodeDHL = Shipment.CarrierService.DeliveryInstruction
+end if
+
+return "^FO420,20^FR^A0N,60,60^FD" & sServiceCodeDHL.ToUpper & "^FS"
+</script>
+
+<script>
+dim customs = "false"
+
+if Shipment.Carrierservice.description.indexOf("non-doc") > 0 then
+	customs = "true"
+else
+	customs = "false"
+end if
+
+if customs = "true" or Shipment.Attributes("DHL_CONTENT_VIDEO") = "Y" then
+	return "^FO397,2^FR^GB172,78,78^FS"
+end if
+</script>
+
+^FO0,80^GB800,2,2^FS
+
+^FO8,88^A0N,22,25^FDFROM:^FS
+<script>
+dim sCrLf = chr(13) & chr(10)
+dim sSenderAddressString = ""
+dim sSenderName = Shipment.Sender.Name
+dim sSenderAddr1 = Shipment.Sender.Address1
+dim sSenderAddr2 = Shipment.Sender.Address2
+dim sSenderZipCode = Shipment.Sender.ZipCode
+dim sSenderCity = Shipment.Sender.City
+dim sSenderCountryDescription = Shipment.Sender.Country.Description
+
+dim sSenderLine1 = ""
+dim sSenderLine2 = ""
+dim sSenderLine3 = ""
+dim sSenderLine4 = ""
+dim sSenderLine5 = ""
+
+if Shipment.Addresses("SENDER").Name <> "" then
+	sSenderName = Shipment.Addresses("SENDER").Name
+	sSenderAddr1 = Shipment.Addresses("SENDER").Address1
+	sSenderAddr2 = Shipment.Addresses("SENDER").Address2
+	sSenderZipCode = Shipment.Addresses("SENDER").ZipCode
+	sSenderCity = Shipment.Addresses("SENDER").City
+	sSenderCountryDescription = Shipment.Addresses("SENDER").Country.Description
+end if
+
+sSenderAddressString = left(sSenderName,35) & "|" & left(sSenderAddr1,35) & "|" & left(sSenderAddr2,35) & "|" & left(sSenderZipCode & " " & sSenderCity,35) & "|" & left(sSenderCountryDescription.ToUpper,35)
+
+sSenderAddressString = replace(replace(sSenderAddressString,"||", "|"),"||", "|")
+
+dim myarray As string()
+
+myarray = Split(sSenderAddressString, "|")
+
+dim arraycount
+arraycount = myarray.length
+
+if arraycount > 0 then
+	sSenderLine1 = myarray(0)
+end if
+
+if arraycount > 1 then
+	sSenderLine2  = myarray(1)
+end if
+
+if arraycount > 2 then
+	sSenderLine3 = myarray(2)
+end if
+
+if arraycount > 3 then
+	sSenderLine4 = myarray(3)
+end if
+
+if arraycount > 4 then
+	sSenderLine5 = myarray(4)
+end if
+
+return "^FO80,88^A0N,22,22^FD" & sSenderLine1 & "^FS" & sCrLf & "^FO80,110^A0N,22,22^FD" & sSenderLine2 & "^FS" & sCrLf & "^FO80,132^A0N,22,22^FD" & sSenderLine3 & "^FS" & sCrLf & "^FO80,154^A0N,22,22^FD" & sSenderLine4 & "^FS" & sCrLf & "^FO80,176^A0N,22,22^FD" & sSenderLine5 & "^FS"
+</script>
+
+<script>
+dim sCrLf = chr(13) & chr(10)
+dim sSenderContact = Shipment.Sender.Reference
+dim sSenderPhone = Shipment.Sender.Phone
+dim sSenderContactOutput = ""
+dim sSenderPhoneOutput = ""
+
+if Shipment.Addresses("PICKUP").Name <> "" then
+	sSenderContact = Shipment.Addresses("PICKUP").Contact
+	sSenderPhone = Shipment.Addresses("PICKUP").Phone
+
+else if Shipment.Addresses("SENDER").Name <> "" then
+	sSenderContact = Shipment.Addresses("SENDER").Contact
+	sSenderPhone = Shipment.Addresses("SENDER").Phone
+end if
+
+if sSenderContact <> "" then
+	sSenderContactOutput = "^FO450,88^A0N,22,22^FDContact:^FS" & sCrLf & "^FO450,110^A0N,22,22^FD" & left(sSenderContact,25) & "^FS"
+end if
+
+if sSenderPhone <> "" then 
+	sSenderPhoneOutput = "^FO450,132^A0N,22,22^FDPhone:^FS" & sCrLf & "^FO450,154^A0N,22,22^FD" & left(sSenderPhone,25) & "^FS"
+end if
+
+return sSenderContactOutput & sCrLf & sSenderPhoneOutput
+</script>
+
+^FO700,90^A0N,15,15^FDOrigin:^FS
+<script>
+dim sDepot
+if Shipment.Attributes("DHL_ORG_SRVA_CODE") <> "" then
+	sDepot = Shipment.Attributes("DHL_ORG_SRVA_CODE")
+else
+	sDepot = Shipment.Sender.Attributes(Shipment.CodeCAR)("DEPOT")
+end if
+
+return "^FO700,110^A0N,50,60^FD" & sDepot.ToUpper & "^FS"
+</script>
+
+^FO0,196^GB800,2,2^FS
+
+^FO0,200^GB32,0,6^FS
+^FO0,200^GB0,32,6^FS
+
+^FO760,200^GB32,0,6^FS
+^FO792,200^GB0,32,6^FS
+
+^FO0,368^GB32,0,6^FS
+^FO0,342^GB0,32,6^FS
+
+^FO760,368^GB32,0,6^FS
+^FO792,342^GB0,32,6^FS
+
+^FO8,210^A0N,22,25^FDTO:^FS
+<script>
+dim sCrLf = chr(13) & chr(10)
+dim sReceiverAddressString = ""
+dim sReceiverName = Shipment.Receiver.Name
+dim sReceiverAddr1 = Shipment.Receiver.Address1
+dim sReceiverAddr2 = Shipment.Receiver.Address2
+dim sReceiverAddr3 = Shipment.Receiver.Address3
+dim sReceiverZipCode = Shipment.Receiver.ZipCode
+dim sReceiverCity = Shipment.Receiver.City
+
+dim sReceiverLine1 = ""
+dim sReceiverLine2 = ""
+dim sReceiverLine3 = ""
+dim sReceiverLine4 = ""
+
+if Shipment.Addresses("RECEIVER").Name <> "" then
+	sReceiverName = Shipment.Addresses("RECEIVER").Name
+	sReceiverAddr1 = Shipment.Addresses("RECEIVER").Address1
+	sReceiverAddr2 = Shipment.Addresses("RECEIVER").Address2
+	sReceiverAddr3 = Shipment.Addresses("RECEIVER").Address3
+	sReceiverZipCode = Shipment.Addresses("RECEIVER").ZipCode
+	sReceiverCity = Shipment.Addresses("RECEIVER").City
+end if
+
+sReceiverAddressString = left(sReceiverName,35) & "|" & left(sReceiverAddr1,35) & "|" & left(sReceiverAddr2,35) & "|" & left(sReceiverAddr3,35) & "|" & left(sReceiverZipCode & " " & sReceiverCity,35)
+
+sReceiverAddressString = replace(replace(sReceiverAddressString,"||", "|"),"||", "|")
+
+dim myarray As string()
+myarray = Split(sReceiverAddressString, "|")
+
+Dim arraycount
+arraycount = myarray.length
+
+if arraycount > 0 then
+	sReceiverLine1 = myarray(0)
+end if
+
+if arraycount > 1 then
+	sReceiverLine2  = myarray(1)
+end if
+
+if arraycount > 2 then
+	sReceiverLine3 = myarray(2)
+end if
+
+if arraycount > 3 then
+	sReceiverLine4 = myarray(3)
+end if
+
+return "^FO80,205^A0N,23,26^FD" & sReceiverLine1 & "^FS" & sCrLf & "^FO80,230^A0N,23,26^FD" & sReceiverLine2 & "^FS" & sCrLf & "^FO80,255^A0N,23,26^FD" & sReceiverLine3 & "^FS" & sCrLf & "^FO80,280^A0N,23,26^FD" & sReceiverLine4 & "^FS"
+</script>
+
+<script>
+dim sCrLf = chr(13) & chr(10)
+dim sReceiverZipCode = Shipment.Receiver.ZipCode
+dim sReceiverCity = Shipment.Receiver.City
+dim sReceiverState = Shipment.Receiver.State
+dim sReceiverCountryDescription = Shipment.Receiver.Country.Description
+dim sReceiverISOCountry = Shipment.Receiver.ISOCountry
+dim sReceiverOutLine1 = ""
+dim sReceiverOutLine2 = ""
+
+if Shipment.Addresses("RECEIVER").Name <> "" then
+	sReceiverZipCode = Shipment.Addresses("RECEIVER").ZipCode
+	sReceiverCity = Shipment.Addresses("RECEIVER").City
+	sReceiverState = Shipment.Addresses("RECEIVER").State
+	sReceiverCountryDescription = Shipment.Addresses("RECEIVER").Country.Description
+	sReceiverISOCountry = Shipment.Addresses("RECEIVER").ISOCountry
+end if
+
+if Shipment.Attributes("DHL_DEST_POSTCODE") <> "" then
+	sReceiverZipCode = Shipment.Attributes("DHL_DEST_POSTCODE")
+	sReceiverCity = Shipment.Addresses("RECEIVER").City
+	sReceiverState = Shipment.Addresses("RECEIVER").State
+	sReceiverCountryDescription = Shipment.Attributes("DHL_DEST_COUNTRY_NAME")
+	sReceiverISOCountry = Shipment.Addresses("RECEIVER").ISOCountry
+end if
+
+if sReceiverISOCountry.ToUpper = "US" OR sReceiverISOCountry.ToUpper = "CA" then
+	sReceiverOutLine1 = sReceiverCity & " " & sReceiverState & " " & sReceiverZipCode
+	sReceiverOutLine2 = sReceiverCountryDescription
+else
+	sReceiverOutLine1 = sReceiverZipCode & " " & sReceiverCity
+	sReceiverOutLine2 = sReceiverCountryDescription
+end if
+
+return "^FO80,315^A0N,32,34^FD" & sReceiverOutLine1 & "^FS" & sCrLf & "^FO80,345^A0N,32,34^FD" & sReceiverOutLine2.ToUpper & "^FS"
+</script>
+
+<script>
+dim sCrLf = chr(13) & chr(10)
+dim sReceiverContact = Shipment.Receiver.Reference
+dim sReceiverPhone = Shipment.Receiver.Phone
+dim sReceiverContactOutput = ""
+dim sReceiverPhoneOutput = ""
+
+if Shipment.Addresses("RECEIVER").Name <> "" then
+	sReceiverContact = Shipment.Addresses("RECEIVER").Contact
+	sReceiverPhone = Shipment.Addresses("RECEIVER").Phone
+end if
+
+if sReceiverContact <> "" then
+	sReceiverContactOutput = "^FO525,205^A0N,22,23^FDContact:^FS" & sCrLf & "^FO525,230^A0N,22,23^FD" & left(sReceiverContact,25) & "^FS"
+end if
+
+if sReceiverPhone <> "" then 
+sReceiverPhoneOutput = "^FO525,255^A0N,22,23^FDPhone:^FS" & sCrLf & "^FO525,280^A0N,22,23^FD" & left(sReceiverPhone,25) & "^FS"
+end if
+
+return sReceiverContactOutput & sCrLf & sReceiverPhoneOutput
+</script>
+
+^FO0,376^GB800,2,2^FS
+
+^FO140,384^A0N,60,60^FD<script>
+if Shipment.Attributes("DHL_CONTENT_CODE") <> "" then
+	dim sRout = sRout & Shipment.Attributes("DHL_DEST_COUNTRY_CODE") & " - " & Shipment.Attributes("DHL_DEST_SRVA_CODE") & " - " & Shipment.Attributes("DHL_DEST_FAC_CODE")
+	return sRout
+else
+	dim sRout = sRout & Shipment.Receiver.ISOCountry & " - " & Shipment.Routing1 & " - " & Shipment.Routing2
+	return sRout
+end if
+</script>^FS
+
+^FO0,432^GB800,2,2^FS
+
+^FO8,436^A0N,22,20^FDProduct:^FS
+^FO8,461^A0N,30,31^FD<script>
+if Shipment.Attributes("DHL_DEST_POSTCODE") <> "" then
+	return "" & Shipment.Attributes("DHL_NETWORK_PRODUCT_CODE") & " - " & Shipment.Attributes("DHL_PRODUCT_NAME") & " (" & Shipment.Attributes("DHL_PRODUCT_SORT_CODE") & ")"
+else
+	return "" & Shipment.CarrierService.FreeText1 & " - " & Shipment.CarrierService.FreeText3.ToUpper & " - (" & Shipment.CarrierService.FreeText2 & ")"
+end if
+</script>^FS
+
+^FO500,436^A0N,20,20^FDFeatures / Services:^FS
+^FO500,464^A0N,20,20^FB270,4^FD<Shipment.ServiceAttributeDisplay>^FS
+
+^FO8,484^A0N,20,20^FDPayment code:^FS
+
+^FO8,507^A0N,20,20^FDFRT: <Shipment.Attributes("BILLINGACCOUNTNO")>^FS
+^FO8,529^A0N,20,20^FDService: <script>
+dim termsofdelivery = ""
+if Shipment.Attributes("Termsofdelivery") <> "" then
+termsofdelivery = Shipment.Attributes("Termsofdelivery")
+else
+termsofdelivery = "DTU"
+end if
+
+return termsofdelivery
+
+</script>^FS
+^FO8,549^A0N,20,20^FDDuty: REC/Taxes: REC^FS
+
+^FO0,574^GB800,2,2^FS
+
+^FO8,580^A0N,20,20^FDAccount number: <script>
+if Shipment.TranspPayerCustNo <> "" then
+	return Shipment.TranspPayerCustNo
+else
+	return Shipment.Sender.Attributes(Shipment.CodeCAR)("CUSTNO")
+end if
+</script>^FS
+
+^FO8,599^A0N,20,20^FDRef code:^FS
+^FO95,599^A0N,20,20^FD<script>
+dim sSenRef
+
+if Shipment.Attributes("SENDERREFERENCE1") <> "" then
+	sSenRef = Shipment.Attributes("SENDERREFERENCE1")
+else if Shipment.OrderNo <> "" then
+	sSenRef = Shipment.OrderNo
+else if Shipment.Reference <> "" then
+	sSenRef = Shipment.Reference
+end if
+
+return sSenRef
+</script>^FS
+
+^FO8,618^A0N,20,20^FDCustoms Value: <Shipment.Value> <Shipment.Currency>^FS
+
+^FO8,637^A0N,20,12^FDShipment Content: <Parcel.TypeOfGoods>^FS
+
+^FO450,580^A0N,20,20^FDShpt Wght: <script>
+if Shipment.Sender.ISOCountry = "US" then
+	return Shipment.WeightInLBS.ToString("0.00") & " lbs"
+else 
+	return Shipment.Weight.ToString("0.0") &  " kg"
+end if
+</script>^FS
+
+^FO450,600^A0N,20,20^FDShipdate: <script>
+if Shipment.Shipdate > Shipment.cr_time_db
+	return DatePart("yyyy",shipment.shipdate) & "-" & right("0" & DatePart("m",shipment.shipdate),2) & "-" & right("0" & DatePart("d",shipment.shipdate),2)
+else
+	return DatePart("yyyy",shipment.cr_time_db) & "-" & right("0" & DatePart("m",shipment.cr_time_db),2) & "-" & right("0" & DatePart("d",shipment.cr_time_db),2)
+end if
+</script>^FS
+
+^FO450,620^A0N,20,20^FD<script>
+if Shipment.Sender.ISOCountry = "US" and Shipment.Attributes("ExportComplianceStatement") = "" then
+	return "NOEEI Sec. 30.37(a)"
+else
+	return Shipment.Attributes("ExportComplianceStatement")
+end if
+</script>^FS
+
+^FO690,580^A0N,20,20^FD# of Pieces:^FS
+^FO745,599^A0N,50,45^FD<script>
+return labelcount
+</script>^FS
+
+^FO0,657^GB800,2,2^FS
+
+^FO30,662^A0N,18,17^FD<script>
+if Shipment.Sender.ISOCountry.ToUpper = "US" then
+	return "These commodities, technology, or software were exported from the United States in accordance with" 
+else 
+	return ""
+end if
+</script>^FS
+
+^FO30,678^A0N,18,17^FD<script>
+if Shipment.Sender.ISOCountry.ToUpper = "US" then
+	return "the Export Administration Regulations. Diversion contrary to U.S law is prohibited." 
+else 
+	return ""
+end if
+</script>^FS
+
+^FO120,694^BY3,2.7^B3N,N,190,N,N^FD<Shipment.SequenceNo>^FS
+^FO120,899^A0N,25,25^FDWAYBILL:^FS
+^FO320,899^A0N,25,25^FD<script>
+	return mid(Shipment.SequenceNo,1,2) & " " & mid(Shipment.SequenceNo,3,4) & " " & mid(Shipment.SequenceNo,7,4)
+</script>^FS
+
+^FO0,929^GB800,2,2^FS
+
+^FO8,959^A0N,22,20^FDLicense Plates of pieces in shipment:^FS
+
+^FO8,984^FB400,5^A0N,22,20^FD<script>
+Dim i
+Dim start = 0
+Dim sSSCC = ""
+
+For i = start To Cint(shipment.parcels.count)-1
+	sSSCC = sSSCC & mid(Shipment.Parcels(i).SequenceNoSSCC,3,8) & " " & mid(Shipment.Parcels(i).SequenceNoSSCC,11,9) & " " & mid(Shipment.Parcels(i).SequenceNoSSCC,20,1) & "\&"
+next
+return sSSCC
+</script>^FS
+^CI0
+^XZ
