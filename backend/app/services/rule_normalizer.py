@@ -103,6 +103,7 @@ def normalize_rules(rules):
             "field": standardized_field,
             "required": rule.get("required", False),
             "regex": rule.get("regex", ""),
+            "detect_by": rule.get("detect_by", ""),
             "description": rule.get("description", "")
         })
 

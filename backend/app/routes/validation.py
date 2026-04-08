@@ -24,16 +24,6 @@ async def detect_spec(label_file: UploadFile = File(...)):
     """
     Parse a label file, auto-detect carrier + region,
     and return matched carrier from DB for user confirmation.
-
-    Returns:
-    {
-        signals: { carrier, origin_country, destination_country, ... },
-        best_match: { carrier_id, carrier_name, confidence, match_reasons, ... },
-        alternatives: [ ... ],
-        all_carriers: [ {_id, carrier}, ... ],  // for manual dropdown fallback
-        needs_confirmation: true,
-        message: "..."
-    }
     """
     db = get_database()
 
@@ -45,7 +35,6 @@ async def detect_spec(label_file: UploadFile = File(...)):
         parsed_label = parse_zpl_script(script)
 
         if not parsed_label:
-            # Still return all carriers for manual selection
             all_carriers = await db.carriers.find(
                 {}, {"_id": 1, "carrier": 1}
             ).to_list(length=None)
@@ -58,15 +47,14 @@ async def detect_spec(label_file: UploadFile = File(...)):
                 "alternatives": [],
                 "all_carriers": [{"_id": c["_id"], "carrier": c["carrier"]} for c in all_carriers],
                 "needs_confirmation": True,
-                "message": "Could not parse the label file. Please select a carrier manually."
+                "message": "Could not parse the label file. Please select a carrier manually.",
             }
 
-        # Match against carriers in MongoDB
         result = await match_carrier_from_label(parsed_label, db)
         return result
 
     except Exception as e:
-        # On error, still return all carriers so user can pick manually
+        # Still return carriers for manual fallback
         try:
             all_carriers = await db.carriers.find(
                 {}, {"_id": 1, "carrier": 1}
@@ -82,7 +70,7 @@ async def detect_spec(label_file: UploadFile = File(...)):
             "alternatives": [],
             "all_carriers": [{"_id": c["_id"], "carrier": c["carrier"]} for c in all_carriers],
             "needs_confirmation": True,
-            "message": f"Error analyzing label: {str(e)}. Please select a carrier manually."
+            "message": f"Error detecting spec: {str(e)}",
         }
 
 
@@ -96,25 +84,9 @@ async def detect_edi_spec(edi_file: UploadFile = File(...)):
 
     try:
         content = await edi_file.read()
-        edi_text = content.decode("utf-8", errors="ignore")
+        edi_content = content.decode("utf-8", errors="ignore")
 
-        if not edi_text.strip():
-            all_carriers = await db.carriers.find(
-                {}, {"_id": 1, "carrier": 1}
-            ).to_list(length=None)
-            for c in all_carriers:
-                c["_id"] = str(c["_id"])
-
-            return {
-                "signals": {},
-                "best_match": None,
-                "alternatives": [],
-                "all_carriers": [{"_id": c["_id"], "carrier": c["carrier"]} for c in all_carriers],
-                "needs_confirmation": True,
-                "message": "EDI file is empty. Please select a carrier manually."
-            }
-
-        result = await match_carrier_from_edi(edi_text, db)
+        result = await match_carrier_from_edi(edi_content, db)
         return result
 
     except Exception as e:
@@ -133,18 +105,19 @@ async def detect_edi_spec(edi_file: UploadFile = File(...)):
             "alternatives": [],
             "all_carriers": [{"_id": c["_id"], "carrier": c["carrier"]} for c in all_carriers],
             "needs_confirmation": True,
-            "message": f"Error analyzing EDI: {str(e)}. Please select a carrier manually."
+            "message": f"Error detecting EDI spec: {str(e)}",
         }
 
 
 # ═══════════════════════════════════════════════════════════════
-# VALIDATION ENDPOINTS
+# LABEL VALIDATION
 # ═══════════════════════════════════════════════════════════════
 
 @router.post("/label")
 async def validate_label(
     carrier_id: str = Form(...),
     label_file: UploadFile = File(...),
+    is_zpl: str = Form("false"),
     spec_name: str = Form(None),
 ):
     db = get_database()
@@ -157,18 +130,37 @@ async def validate_label(
     if not carrier:
         raise HTTPException(status_code=404, detail="Carrier not found")
 
+    carrier_name = carrier.get("carrier", "")
+
+    print("\n" + "=" * 70)
+    print(f"LABEL VALIDATION REQUEST")
+    print(f"=" * 70)
+    print(f"   Carrier:    {carrier_name} (ID: {carrier_id})")
+    print(f"   Spec Name:  {spec_name or 'auto'}")
+    print(f"   Is ZPL:     {is_zpl}")
+
     rules = carrier.get("rules", [])
 
     if not rules:
         raise HTTPException(
             status_code=400,
-            detail="No rule versions found for this carrier. Upload specs first."
+            detail="No rule versions found for this carrier. Upload specs first.",
         )
 
-    active_rule = next(
-        (r for r in rules if r.get("status") == "active"),
-        None
-    )
+    # If spec_name is provided, try to find rules for that specific spec
+    active_rule = None
+    if spec_name:
+        active_rule = next(
+            (r for r in rules if r.get("spec_name") == spec_name and r.get("status") == "active"),
+            None,
+        )
+
+    # Fallback to any active rule
+    if not active_rule:
+        active_rule = next(
+            (r for r in rules if r.get("status") == "active"),
+            None,
+        )
 
     if not active_rule:
         raise HTTPException(status_code=400, detail="No active rule version found.")
@@ -178,43 +170,52 @@ async def validate_label(
     if not label_rules:
         raise HTTPException(
             status_code=400,
-            detail="No label rules found in active version."
+            detail="No label rules found in active version.",
         )
 
-    label_path = await save_upload_file(label_file, "label")
+    print(f"   Rule Version: {active_rule.get('version', '?')}")
+    print(f"   Label Rules Keys: {list(label_rules.keys())}")
+
+    # Read label file
+    label_path = await save_upload_file(label_file, "labels")
     file_ext = os.path.splitext(label_path)[1].lower()
 
-    validator = LabelValidator(label_rules)
+    is_zpl_file = is_zpl.lower() == "true" or file_ext == ".zpl"
 
-    if file_ext in [".zpl", ".txt"]:
-        label_text = read_text_file(label_path)
-        result = await validator.validate(label_text.encode("utf-8"), is_zpl=True)
+    try:
+        if is_zpl_file:
+            label_content = read_text_file(label_path)
+            print(f"   File Type:  ZPL ({len(label_content)} chars)")
+        else:
+            label_content = read_file_content(label_path)
+            print(f"   File Type:  Image/PDF")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Unable to read label file")
 
-    elif file_ext in [".png", ".jpg", ".jpeg"]:
-        image_bytes = read_file_content(label_path)
-        result = await validator.validate(image_bytes, is_zpl=False)
+    # Pass carrier_name so mandatory overrides work
+    validator = LabelValidator(label_rules, carrier_name=carrier_name)
+    result = await validator.validate(label_content, is_zpl=is_zpl_file)
 
-    elif file_ext == ".pdf":
-        image_bytes = read_file_content(label_path)
-        result = await validator.validate(image_bytes, is_zpl=False)
-
-    else:
-        raise HTTPException(status_code=400, detail="Unsupported label file type")
-
+    # Save to history
     await db.validation_results.insert_one({
         "carrier_id": carrier_id,
-        "carrier_name": carrier.get("carrier", ""),
-        "spec_name": spec_name,
+        "carrier_name": carrier_name,
         "validation_type": "label",
+        "spec_name": spec_name,
         "status": result["status"],
         "errors": result["errors"],
         "corrected_script": result.get("corrected_label_script"),
+        "compliance_score": result.get("compliance_score", 0),
         "original_file_path": label_path,
-        "created_at": datetime.utcnow()
+        "created_at": datetime.utcnow(),
     })
 
     return {"success": True, "validation": result}
 
+
+# ═══════════════════════════════════════════════════════════════
+# EDI VALIDATION
+# ═══════════════════════════════════════════════════════════════
 
 @router.post("/edi")
 async def validate_edi(
@@ -231,21 +232,40 @@ async def validate_edi(
     if not carrier:
         raise HTTPException(status_code=404, detail="Carrier not found")
 
+    carrier_name = carrier.get("carrier", "")
+
     rules = carrier.get("rules", [])
+
+    if not rules:
+        raise HTTPException(
+            status_code=400,
+            detail="No rule versions found for this carrier. Upload specs first.",
+        )
 
     active_rule = next(
         (r for r in rules if r.get("status") == "active"),
-        None
+        None,
     )
 
-    edi_rules = active_rule.get("edi_rules", {}) if active_rule else {}
+    if not active_rule:
+        raise HTTPException(status_code=400, detail="No active rule version found.")
+
+    edi_rules = active_rule.get("edi_rules", {})
 
     if not edi_rules:
         raise HTTPException(
             status_code=400,
-            detail="No EDI rules found for this carrier. Upload specs first."
+            detail="No EDI rules found in active version.",
         )
 
+    print("\n" + "=" * 70)
+    print(f"EDI VALIDATION REQUEST")
+    print(f"=" * 70)
+    print(f"   Carrier:      {carrier_name} (ID: {carrier_id})")
+    print(f"   Rule Version: {active_rule.get('version', '?')}")
+    print(f"   EDI Rules Keys: {list(edi_rules.keys())}")
+
+    # Read EDI file
     edi_path = await save_upload_file(edi_file, "edi")
     file_ext = os.path.splitext(edi_path)[1].lower()
 
@@ -254,25 +274,33 @@ async def validate_edi(
 
     try:
         edi_content = read_text_file(edi_path)
+        print(f"   File Size:    {len(edi_content)} chars")
+        print(f"   File Ext:     {file_ext}")
     except Exception:
         raise HTTPException(status_code=400, detail="Unable to read EDI file as text")
 
     validator = EDIValidator(edi_rules)
     result = await validator.validate(edi_content)
 
+    # Save to history
     await db.validation_results.insert_one({
         "carrier_id": carrier_id,
-        "carrier_name": carrier.get("carrier", ""),
+        "carrier_name": carrier_name,
         "validation_type": "edi",
         "status": result["status"],
         "errors": result["errors"],
         "corrected_script": result.get("corrected_edi_script"),
+        "compliance_score": result.get("compliance_score", 0),
         "original_file_path": edi_path,
-        "created_at": datetime.utcnow()
+        "created_at": datetime.utcnow(),
     })
 
     return {"success": True, "validation": result}
 
+
+# ═══════════════════════════════════════════════════════════════
+# VALIDATION HISTORY
+# ═══════════════════════════════════════════════════════════════
 
 @router.get("/history/{carrier_id}")
 async def get_validation_history(carrier_id: str, limit: int = 10):

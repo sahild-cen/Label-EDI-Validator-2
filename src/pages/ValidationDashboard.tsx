@@ -68,10 +68,48 @@ interface DetectionResult {
 
 
 // ═══════════════════════════════════════════
+// CORRECTED SCRIPT DISCLAIMER
+// ═══════════════════════════════════════════
+
+function CorrectedScriptDisclaimer() {
+  return (
+    <div style={{
+      backgroundColor: '#fef3c7',
+      border: '1px solid #f59e0b',
+      borderRadius: '6px',
+      padding: '8px 12px',
+      marginBottom: '12px',
+      fontSize: '12px',
+      color: '#92400e',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+    }}>
+      <span style={{ fontSize: '14px' }}>⚠️</span>
+      <span>
+        This corrected script is auto-generated and may not be fully accurate.
+        Please review and verify before using it in production.
+      </span>
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════════════
+// SCORE DISPLAY HELPER
+// ═══════════════════════════════════════════
+// Backend may return score as 0–1 (ratio) or 0–100 (percentage).
+// This normalizes to a percentage string like "66.7%".
+
+function formatScore(score: number): string {
+  if (score <= 1) return (score * 100).toFixed(1);
+  return score.toFixed(1);
+}
+
+
+// ═══════════════════════════════════════════
 // INLINE ERROR FEEDBACK — "This is wrong"
 // ═══════════════════════════════════════════
-// Replaces each error row when user flags it.
-// Sits inside the existing error list, same styling.
 
 function ErrorWithFeedback({
   error,
@@ -189,7 +227,7 @@ function ReportMissingCheck({
     try {
       const result = await correctionApi.submit({
         carrier,
-        field: field.trim(),  // Backend normalizes: "Shipment Date" → "shipment_date"
+        field: field.trim(),
         correction_type: 'missing_check',
         notes: notes || undefined,
       });
@@ -253,7 +291,7 @@ function ReportMissingCheck({
 
 
 // ═══════════════════════════════════════════
-// CARRIER CONFIRMATION COMPONENT (unchanged)
+// CARRIER CONFIRMATION COMPONENT
 // ═══════════════════════════════════════════
 
 function CarrierConfirmation({
@@ -497,7 +535,6 @@ export default function ValidationDashboard() {
   const [labelConfirmed, setLabelConfirmed] = useState<{ carrierId: string; carrierName: string } | null>(null);
   const [labelValidating, setLabelValidating] = useState(false);
   const [labelResult, setLabelResult] = useState<ValidationResult | null>(null);
-  // NEW: feedback state
   const [labelCorrectedFields, setLabelCorrectedFields] = useState<Set<string>>(new Set());
   const [labelAddedFields, setLabelAddedFields] = useState<string[]>([]);
 
@@ -511,7 +548,6 @@ export default function ValidationDashboard() {
   const [ediConfirmed, setEdiConfirmed] = useState<{ carrierId: string; carrierName: string } | null>(null);
   const [ediValidating, setEdiValidating] = useState(false);
   const [ediResult, setEdiResult] = useState<ValidationResult | null>(null);
-  // NEW: feedback state
   const [ediCorrectedFields, setEdiCorrectedFields] = useState<Set<string>>(new Set());
   const [ediAddedFields, setEdiAddedFields] = useState<string[]>([]);
 
@@ -579,7 +615,6 @@ export default function ValidationDashboard() {
     }
   };
 
-  // NEW: Re-validate after corrections
   const handleLabelRevalidate = () => {
     if (labelConfirmed) {
       handleLabelConfirm(labelConfirmed.carrierId, labelConfirmed.carrierName);
@@ -752,7 +787,6 @@ export default function ValidationDashboard() {
                   </p>
                 </div>
 
-                {/* CHANGED: Error rows now have "This is wrong" button */}
                 {labelResult.errors?.length > 0 && (
                   <div>
                     <h3 className="font-medium mb-2">Errors Found:</h3>
@@ -769,7 +803,6 @@ export default function ValidationDashboard() {
                   </div>
                 )}
 
-                {/* NEW: Learning summary */}
                 {labelCorrectedFields.size > 0 && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start gap-2">
                     <Sparkles className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
@@ -779,13 +812,11 @@ export default function ValidationDashboard() {
                   </div>
                 )}
 
-                {/* NEW: Report missing check */}
                 <ReportMissingCheck
                   carrier={labelConfirmed?.carrierName || 'unknown'}
                   onAdded={(f) => setLabelAddedFields(p => [...p, f])}
                 />
 
-                {/* NEW: Added fields confirmation */}
                 {labelAddedFields.length > 0 && (
                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
                     <Sparkles className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
@@ -795,7 +826,6 @@ export default function ValidationDashboard() {
                   </div>
                 )}
 
-                {/* NEW: Re-validate button */}
                 {labelHasChanges && (
                   <button onClick={handleLabelRevalidate}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#4a4337] text-white rounded-lg font-medium hover:bg-[#3a3529]">
@@ -803,6 +833,7 @@ export default function ValidationDashboard() {
                   </button>
                 )}
 
+                {/* ═══ CHANGED: Label corrected script with disclaimer ═══ */}
                 {labelResult.corrected_label_script && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
@@ -812,6 +843,7 @@ export default function ValidationDashboard() {
                         {copied === 'label' ? <><CheckCircle className="w-4 h-4" /> Copied!</> : <><Copy className="w-4 h-4" /> Copy</>}
                       </button>
                     </div>
+                    <CorrectedScriptDisclaimer />
                     <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto max-h-64">{labelResult.corrected_label_script}</pre>
                   </div>
                 )}
@@ -897,10 +929,14 @@ export default function ValidationDashboard() {
                       {ediResult.status}
                     </span>
                   </div>
-                  <p className="text-sm">Compliance Score: {(ediResult.compliance_score * 100).toFixed(1)}%</p>
+                  {/* ═══ CHANGED: Smart score display — handles both 0-1 and 0-100 ═══ */}
+                  <p className="text-sm">
+                    {ediResult.status === 'PASS'
+                      ? 'EDI file is valid and compliant.'
+                      : `${ediResult.errors.length} issue(s) found. Please review below.`}
+                  </p>
                 </div>
 
-                {/* CHANGED: Error rows now have "This is wrong" button */}
                 {ediResult.errors?.length > 0 && (
                   <div>
                     <h3 className="font-medium mb-2">Errors Found:</h3>
@@ -947,6 +983,7 @@ export default function ValidationDashboard() {
                   </button>
                 )}
 
+                {/* ═══ CHANGED: EDI corrected script with disclaimer ═══ */}
                 {ediResult.corrected_edi_script && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
@@ -956,6 +993,7 @@ export default function ValidationDashboard() {
                         {copied === 'edi' ? <><CheckCircle className="w-4 h-4" /> Copied!</> : <><Copy className="w-4 h-4" /> Copy</>}
                       </button>
                     </div>
+                    <CorrectedScriptDisclaimer />
                     <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto max-h-64">{ediResult.corrected_edi_script}</pre>
                   </div>
                 )}

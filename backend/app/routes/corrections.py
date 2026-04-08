@@ -1,13 +1,10 @@
 """
 corrections.py — Place in app/routes/corrections.py
 
-Add to main.py:
-    from app.routes.corrections import router as corrections_router
-    app.include_router(corrections_router)
-
 Two things this does:
 1. When user says "this error is wrong" → stores it, suppresses it next time
-2. When user says "you missed this check" → stores it, enforces it next time
+2. When user says "you missed this check" → injects field directly into 
+   carrier's active rules in MongoDB so it's checked immediately on revalidate
 """
 
 from fastapi import APIRouter, HTTPException
@@ -22,13 +19,8 @@ router = APIRouter()
 # ═══════════════════════════════════════════
 # Field name normalizer
 # ═══════════════════════════════════════════
-# Users type "Shipment Date" or "tracking number" or "PIECE COUNT"
-# We need to convert that to "shipment_date", "tracking_number", "piece_count"
-# AND match it to a known canonical name if possible.
 
-# All known field names in the system — used for fuzzy matching
 KNOWN_FIELDS = {
-    # canonical_name: [possible user inputs]
     "tracking_number": ["tracking number", "tracking no", "tracking #", "tracking", "trk", "waybill", "waybill number", "awb"],
     "shipment_date": ["shipment date", "ship date", "date", "pickup date", "dispatch date", "collection date", "shipping date"],
     "service_type": ["service type", "service", "service name", "service description", "product", "product type", "delivery service"],
@@ -41,7 +33,7 @@ KNOWN_FIELDS = {
     "city": ["city", "destination city", "ship to city", "town"],
     "country_code": ["country code", "country", "destination country"],
     "weight": ["weight", "package weight", "gross weight", "shipment weight", "actual weight"],
-    "piece_count": ["piece count", "pieces", "package count", "number of pieces", "no of pieces"],
+    "piece_count": ["piece count", "pieces", "package count", "number of pieces", "no of pieces", "package sequence"],
     "reference_number": ["reference number", "reference", "ref number", "ref", "customer reference"],
     "billing": ["billing", "billing method", "billing type", "payment method", "bill type"],
     "license_plate": ["license plate", "licence plate", "sscc", "lp"],
@@ -51,6 +43,18 @@ KNOWN_FIELDS = {
     "special_handling": ["special handling", "handling codes", "handling"],
     "destination_airport": ["destination airport", "airport", "airport id", "airport code"],
     "form_id": ["form id", "form code", "form number", "form"],
+    "service_icon": ["service icon", "icon"],
+    "maxicode": ["maxicode", "maxi code"],
+    "postal_barcode": ["postal barcode"],
+    "recipient_country_code": ["recipient country code", "country code with parentheses"],
+    "opco_identifier": ["opco identifier", "opco", "company identifier"],
+    "planned_service_label": ["planned service label", "planned service", "service level"],
+    "documentation_indicator": ["documentation indicator", "doc indicator", "edi indicator"],
+    "bill_type": ["bill type", "billing type"],
+    "ursa_routing_code": ["ursa routing code", "ursa code", "ursa", "routing code"],
+    "airport_id": ["airport id", "airport code", "destination airport"],
+    "destination_zip": ["destination zip", "destination postal code", "dest zip"],
+    "package_count": ["package count", "package sequence", "piece count", "pieces"],
 }
 
 
@@ -58,16 +62,10 @@ def normalize_field_name(raw_input: str) -> str:
     """
     Convert user input like "Shipment Date" or "tracking number"
     into the canonical field name like "shipment_date" or "tracking_number".
-
-    Steps:
-    1. Clean: strip, lowercase
-    2. Try exact match against known fields
-    3. Try fuzzy match (input contains or is contained by a known alias)
-    4. Fall back to snake_case conversion of the raw input
     """
     cleaned = raw_input.strip().lower()
 
-    # Already in snake_case and matches a known field?
+    # Already matches a canonical name?
     for canonical, aliases in KNOWN_FIELDS.items():
         if cleaned == canonical:
             return canonical
@@ -92,7 +90,7 @@ def normalize_field_name(raw_input: str) -> str:
     if best_match:
         return best_match
 
-    # Nothing matched — just return snake_case of whatever they typed
+    # Nothing matched — return snake_case of whatever they typed
     return snake
 
 
@@ -109,7 +107,7 @@ class CorrectionRequest(BaseModel):
 
 
 # ═══════════════════════════════════════════
-# POST /api/corrections — User submits feedback
+# POST /api/corrections
 # ═══════════════════════════════════════════
 
 @router.post("/api/corrections")
@@ -120,18 +118,17 @@ async def submit_correction(req: CorrectionRequest):
         raise HTTPException(status_code=500, detail="Database not available")
 
     carrier = req.carrier.lower().strip()
-
-    # Normalize whatever the user typed into a proper field name
     raw_field = req.field.strip()
     field = normalize_field_name(raw_field)
 
     if field != raw_field.lower().replace(" ", "_"):
         print(f"  [Normalizer] '{raw_field}' → '{field}'")
 
-    # Store for audit
+    # Audit trail
     db.validation_corrections.insert_one({
         "carrier": carrier,
         "field": field,
+        "raw_input": raw_field,
         "correction_type": req.correction_type,
         "actual_value": req.actual_value,
         "notes": req.notes,
@@ -139,8 +136,6 @@ async def submit_correction(req: CorrectionRequest):
     })
 
     if req.correction_type == "wrong_error":
-        # "This error is wrong — the field IS correct on the label"
-        # → Suppress this error in future validations
         db.false_positive_overrides.update_one(
             {"carrier": carrier, "field": field},
             {
@@ -156,13 +151,12 @@ async def submit_correction(req: CorrectionRequest):
         )
         return {
             "success": True,
-            "message": f"Got it — '{field}' errors will be suppressed for {carrier} labels going forward.",
+            "message": f"Got it — '{field}' errors will be suppressed for {carrier} labels.",
             "normalized_field": field,
         }
 
     elif req.correction_type == "missing_check":
-        # "You missed this — this field should be checked"
-        # → Make it mandatory in future validations
+        # Save to mandatory_field_overrides (backup)
         db.mandatory_field_overrides.update_one(
             {"carrier": carrier, "field": field},
             {
@@ -179,17 +173,108 @@ async def submit_correction(req: CorrectionRequest):
             },
             upsert=True,
         )
-        return {
-            "success": True,
-            "message": f"Got it — '{field}' is now mandatory for {carrier}. It will be checked in all future validations.",
-            "normalized_field": field,
-        }
+
+        # ALSO inject directly into the carrier's active rules
+        # This is the primary mechanism — works immediately on revalidate
+        injected = _inject_field_into_active_rules(db, carrier, field, req.notes)
+
+        if injected:
+            return {
+                "success": True,
+                "message": f"'{field}' is now mandatory for {carrier}. "
+                           f"Re-validate to see the updated results.",
+                "normalized_field": field,
+            }
+        else:
+            # Fallback: override collection will still work via _load_mandatory_overrides
+            return {
+                "success": True,
+                "message": f"'{field}' override saved for {carrier}. "
+                           f"It will be checked on next validation.",
+                "normalized_field": field,
+            }
 
     return {"success": False, "message": "Unknown correction type"}
 
 
 # ═══════════════════════════════════════════
-# GET /api/corrections — View past corrections
+# Inject field into carrier's active rules
+# ═══════════════════════════════════════════
+
+def _inject_field_into_active_rules(db, carrier: str, field: str, notes: str = None) -> bool:
+    """
+    Write the missing field directly into the carrier's active rule version
+    in the carriers collection. Uses case-insensitive carrier name matching.
+    
+    This means on revalidate, the field is part of the rules themselves —
+    no separate collection lookup needed.
+    """
+    try:
+        # Case-insensitive carrier lookup
+        carrier_doc = db.carriers.find_one({
+            "carrier": {"$regex": f"^{re.escape(carrier)}$", "$options": "i"}
+        })
+
+        if not carrier_doc:
+            print(f"  [Missing Check] Carrier '{carrier}' not found in DB")
+            return False
+
+        rules_list = carrier_doc.get("rules", [])
+
+        # Find active version index
+        active_idx = None
+        for i, rule_version in enumerate(rules_list):
+            if rule_version.get("status") == "active":
+                active_idx = i
+                break
+
+        if active_idx is None:
+            print(f"  [Missing Check] No active rule version for '{carrier}'")
+            return False
+
+        active_rules = rules_list[active_idx]
+        label_rules = active_rules.get("label_rules", {})
+        field_formats = label_rules.get("field_formats", {})
+        required_fields = label_rules.get("required_fields", [])
+
+        # Already required? Nothing to do
+        if field in field_formats and field_formats[field].get("required"):
+            print(f"  [Missing Check] '{field}' already required for '{carrier}'")
+            return True
+
+        # Build the new field entry
+        new_field = {
+            "pattern": "",
+            "required": True,
+            "description": notes or f"User reported: {field} must be present on label",
+        }
+
+        # Add to required_fields list
+        if field not in required_fields:
+            required_fields.append(field)
+
+        # Write to MongoDB
+        db.carriers.update_one(
+            {"_id": carrier_doc["_id"]},
+            {
+                "$set": {
+                    f"rules.{active_idx}.label_rules.field_formats.{field}": new_field,
+                    f"rules.{active_idx}.label_rules.required_fields": required_fields,
+                }
+            }
+        )
+
+        print(f"  [Missing Check] Injected '{field}' as required into "
+              f"'{carrier}' active rules (v{active_rules.get('version', '?')})")
+        return True
+
+    except Exception as e:
+        print(f"  [Missing Check] Error injecting into active rules: {e}")
+        return False
+
+
+# ═══════════════════════════════════════════
+# GET /api/corrections
 # ═══════════════════════════════════════════
 
 @router.get("/api/corrections")
@@ -212,13 +297,12 @@ async def get_corrections(carrier: Optional[str] = None):
 
 
 # ═══════════════════════════════════════════
-# Functions called by label_validator.py
+# Called by label_validator.py
 # ═══════════════════════════════════════════
 
 def check_corrections_before_failing(db, carrier: str, field: str) -> bool:
     """
-    Called in label_validator.py BEFORE reporting a failure.
-    Returns True if this error should be SUPPRESSED (user said it was wrong before).
+    Returns True if this error should be SUPPRESSED.
     """
     if db is None:
         return False
@@ -229,7 +313,7 @@ def check_corrections_before_failing(db, carrier: str, field: str) -> bool:
         })
         if hit:
             print(f"  [Learned] Suppressing '{field}' for {carrier} — "
-                  f"previously flagged as incorrect ({hit.get('count', 1)}x)")
+                  f"flagged as incorrect ({hit.get('count', 1)}x)")
             return True
         return False
     except Exception:

@@ -58,6 +58,7 @@ class SpecEngine:
                             label_rules["field_formats"][field] = {
                                 "pattern": rule.get("regex", ""),
                                 "required": rule.get("required", False),
+                                "detect_by": rule.get("detect_by", ""),
                                 "description": rule.get("description", "")
                             }
                         else:
@@ -67,6 +68,8 @@ class SpecEngine:
                                 existing["pattern"] = rule["regex"]
                             if rule.get("description") and not existing.get("description"):
                                 existing["description"] = rule["description"]
+                            if rule.get("detect_by") and not existing.get("detect_by"):
+                                existing["detect_by"] = rule["detect_by"]
 
                         if rule.get("required") and field:
                             if field not in label_rules.get("required_fields", []):

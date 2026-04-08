@@ -44,13 +44,16 @@ RULE_KEYWORDS = [
     "required", "length", "must", "shall", "digit", "numeric",
     "alphanumeric", "encoding", "weight", "segment",
     "element", "edi", "shipment", "consignment", "address",
-    "piece", "service", "product", "country", "code"
+    "piece", "service", "product", "country", "code",
+    "icon", "indicator", "billing", "description",
+    "airport", "destination", "origin", "recipient",
+    "sender", "receiver", "shipper", "phone", "date",
 ]
 
 IGNORE_FIELD_KEYWORDS = [
-    "iso", "standard", "specification", "example", "guide",
-    "implementation", "document", "version", "copyright",
-    "appendix", "annex", "glossary", "definition", "index"
+    "iso_standard", "specification", "example", "guide",
+    "implementation", "document", "copyright",
+    "appendix", "annex", "glossary", "definition",
 ]
 
 
@@ -61,11 +64,30 @@ def filter_rule_chunks(chunks):
 
 
 def filter_meta_rules(rules):
-    """Remove rules with meta/structural field names (light filter only)."""
-    return [
-        r for r in rules
-        if not any(k in r.get("field_name", r.get("field", "")).lower() for k in IGNORE_FIELD_KEYWORDS)
-    ]
+    """
+    Light pre-filter — only remove clearly meta/structural entries.
+    Let Pass 2 AI handle the real classification.
+    DO NOT use keyword lists that could drop legitimate label fields.
+    """
+    filtered = []
+    for r in rules:
+        field = r.get("field_name", r.get("field", "")).lower().strip()
+
+        # Skip empty
+        if not field:
+            continue
+
+        # Skip absurdly long names (LLM hallucination)
+        if len(field) > 50:
+            continue
+
+        # Only skip things that are clearly document metadata, not label fields
+        if any(k in field for k in IGNORE_FIELD_KEYWORDS):
+            continue
+
+        filtered.append(r)
+
+    return filtered
 
 
 def deduplicate_rules(rules):
@@ -220,8 +242,6 @@ def extract_rules_from_pdf(file_path: str, carrier_name: str = "", db=None) -> L
         print(f"  {r['field']} [{status}] ({regex_status})")
 
     # ═══ OFFER TO SAVE AS GOLDEN RULES ═══
-    # In production, this would be triggered by a UI button after the user reviews
-    # For now, we return the rules and the caller can save them
     if final_rules and carrier_name:
         print(f"\n[Pipeline] TIP: Call save_golden_rules(db, '{carrier_name}', rules) "
               f"to cache these as verified rules for next time")

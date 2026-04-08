@@ -107,4 +107,14 @@ export const api = {
     });
     return response.json();
   },
+
+  async detectEdiSpec(ediFile: File) {
+    const formData = new FormData();
+    formData.append('edi_file', ediFile);
+    const response = await fetch(`${API_BASE_URL}/api/validate/detect-edi-spec`, {
+      method: 'POST',
+      body: formData,
+    });
+    return response.json();
+  },
 };

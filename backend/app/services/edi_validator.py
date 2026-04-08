@@ -66,6 +66,7 @@ class EDIValidator:
         if format_type == "x12":
             seg_delim, elem_delim = "~", "*"
         else:
+            # EDIFACT: handle UNA service string advice
             seg_delim, elem_delim = "'", "+"
 
         segments = content.split(seg_delim)
@@ -85,157 +86,320 @@ class EDIValidator:
     async def validate(self, edi_content: str) -> Dict[str, Any]:
         errors = []
 
+        # ── Step 1: Detect format ──
         format_type = self.detect_format(edi_content)
 
+        print("\n" + "=" * 70)
+        print("EDI VALIDATION — TERMINAL DEBUG OUTPUT")
+        print("=" * 70)
+        print(f"\n📄 EDI Content Preview (first 300 chars):")
+        print(f"   {edi_content[:300]}...")
+        print(f"\n🔍 Detected Format: {format_type}")
+
+        # ── Step 2: Parse content ──
         try:
             parsed_data = self.parse_content(edi_content, format_type)
         except Exception as e:
+            print(f"\n❌ PARSE ERROR: {str(e)}")
             errors.append(ValidationError(
                 field="parsing",
-                expected="Valid {} format".format(format_type),
+                expected=f"Valid {format_type} format",
                 actual="Parse error",
-                description="Failed to parse EDI content: {}".format(str(e))
+                description=f"Failed to parse EDI content: {str(e)}"
             ))
             return {
                 "status": "FAIL",
                 "errors": [err.dict() for err in errors],
                 "corrected_edi_script": None,
-                "compliance_score": 0.0
+                "compliance_score": 0.0,
             }
 
-        required_segments = self.rules.get("required_segments", [])
-        segment_order = self.rules.get("segment_order", [])
-
+        # ── Step 3: Log parsed segments ──
         if format_type in ["x12", "edifact"]:
             segments = parsed_data.get("segments", [])
             segment_ids = [seg["segment_id"] for seg in segments]
 
+            print(f"\n📦 Parsed Segments ({len(segments)} total):")
+            for seg in segments:
+                sid = seg["segment_id"]
+                elems = seg["elements"]
+                preview = "+".join(elems[:5])
+                if len(elems) > 5:
+                    preview += f"... (+{len(elems) - 5} more)"
+                print(f"   [{sid:6s}] {preview}")
+
+            print(f"\n📋 Segment IDs found: {segment_ids}")
+        else:
+            segment_ids = []
+            print(f"\n📦 Parsed Data Keys: {list(parsed_data.keys()) if isinstance(parsed_data, dict) else 'N/A'}")
+
+        # ── Step 4: Load rules ──
+        required_segments = self.rules.get("required_segments", [])
+        segment_order = self.rules.get("segment_order", [])
+        required_fields = self.rules.get("required_fields", [])
+        delimiter_rules = self.rules.get("delimiter_rules", {})
+
+        print(f"\n{'─' * 70}")
+        print("📜 RULES FROM JSON (what we're validating against):")
+        print(f"{'─' * 70}")
+        print(f"   Required Segments: {required_segments}")
+        print(f"   Segment Order:     {segment_order}")
+        print(f"   Required Fields:   {required_fields}")
+        print(f"   Delimiter Rules:   {delimiter_rules}")
+        print(f"   Format Type Rule:  {self.rules.get('format_type', 'not specified')}")
+
+        # ── Step 5: Validate format-specific rules ──
+        total_checks = 0
+        passed_checks = 0
+
+        if format_type in ["x12", "edifact"]:
+
+            # ── 5a: Check required segments ──
+            print(f"\n{'─' * 70}")
+            print("✅ SEGMENT PRESENCE CHECKS:")
+            print(f"{'─' * 70}")
+
+            # Filter required segments to match the detected format
+            # X12 segments: ISA, GS, ST, SE, GE, IEA
+            # EDIFACT segments: UNA, UNB, UNH, UNT, UNZ, BGM, DTM, etc.
+            x12_segments = {"ISA", "GS", "ST", "SE", "GE", "IEA"}
+            edifact_segments = {"UNA", "UNB", "UNH", "UNT", "UNZ", "BGM", "DTM",
+                                "NAD", "CTA", "COM", "TDT", "LOC", "RFF", "FTX",
+                                "GID", "MEA", "DIM", "PCI", "GIN", "CNT"}
+
             for required_seg in required_segments:
-                if required_seg not in segment_ids:
+                total_checks += 1
+
+                # Skip segments that don't belong to the detected format
+                seg_upper = required_seg.upper().replace(":", "")
+                if format_type == "edifact" and seg_upper in x12_segments:
+                    print(f"   ⏭️  '{required_seg}' — SKIPPED (X12 segment, file is EDIFACT)")
+                    passed_checks += 1  # Don't penalize
+                    continue
+                elif format_type == "x12" and seg_upper in edifact_segments:
+                    print(f"   ⏭️  '{required_seg}' — SKIPPED (EDIFACT segment, file is X12)")
+                    passed_checks += 1  # Don't penalize
+                    continue
+
+                # Check if segment exists (handle UNA: prefix edge case)
+                found = False
+                for sid in segment_ids:
+                    # Normalize: "UNA:" → "UNA", "UNB" → "UNB"
+                    sid_clean = sid.rstrip(":").strip()
+                    req_clean = required_seg.rstrip(":").strip()
+                    if sid_clean.upper() == req_clean.upper():
+                        found = True
+                        break
+
+                if found:
+                    print(f"   ✅ '{required_seg}' — FOUND in EDI")
+                    passed_checks += 1
+                else:
+                    print(f"   ❌ '{required_seg}' — MISSING from EDI")
                     errors.append(ValidationError(
                         field="segments",
-                        expected="Segment '{}' present".format(required_seg),
+                        expected=f"Segment '{required_seg}' present",
                         actual="Segment missing",
-                        description="Required segment '{}' is missing".format(required_seg)
+                        description=f"Required segment '{required_seg}' is missing",
                     ))
 
+            # ── 5b: Check segment order ──
             if segment_order:
-                actual_indices = []
-                for seg in segment_order:
-                    if seg in segment_ids:
-                        actual_indices.append(segment_ids.index(seg))
+                total_checks += 1
+                print(f"\n{'─' * 70}")
+                print("📐 SEGMENT ORDER CHECK:")
+                print(f"{'─' * 70}")
 
-                if actual_indices != sorted(actual_indices):
-                    order_str = ", ".join(segment_order)
-                    actual_str = ", ".join(segment_ids[:5])
+                # Only check order for segments that are actually present and
+                # belong to the detected format
+                relevant_order = []
+                for seg in segment_order:
+                    seg_upper = seg.upper().replace(":", "")
+                    if format_type == "edifact" and seg_upper in x12_segments:
+                        continue
+                    if format_type == "x12" and seg_upper in edifact_segments:
+                        continue
+                    relevant_order.append(seg)
+
+                # Build actual order of relevant segments
+                actual_relevant = []
+                for sid in segment_ids:
+                    sid_clean = sid.rstrip(":").strip().upper()
+                    for rel in relevant_order:
+                        if sid_clean == rel.upper():
+                            actual_relevant.append(rel)
+                            break
+
+                print(f"   Expected order (format-filtered): {relevant_order}")
+                print(f"   Actual order (in file):           {actual_relevant}")
+
+                # Check if the relative order is preserved
+                order_correct = True
+                last_idx = -1
+                for seg in relevant_order:
+                    if seg in actual_relevant:
+                        idx = actual_relevant.index(seg)
+                        if idx < last_idx:
+                            order_correct = False
+                            break
+                        last_idx = idx
+
+                if order_correct:
+                    print(f"   ✅ Segment order is correct")
+                    passed_checks += 1
+                else:
+                    print(f"   ❌ Segment order violation detected")
+                    actual_preview = ", ".join(segment_ids[:10])
+                    if len(segment_ids) > 10:
+                        actual_preview += "..."
                     errors.append(ValidationError(
                         field="segment_order",
-                        expected="Segments in order: {}".format(order_str),
-                        actual="Actual order: {}...".format(actual_str),
-                        description="Segments are not in the correct order"
+                        expected=f"Segments in order: {', '.join(relevant_order)}",
+                        actual=f"Actual order: {actual_preview}",
+                        description="Segments are not in the correct order",
                     ))
 
-            # Validate element-level rules if present
-            element_rules = self.rules.get("field_formats", {})
-            for field_name, rule in element_rules.items():
-                pattern = rule.get("pattern", "")
-                required = rule.get("required", False)
-                found = False
-                for seg in segments:
-                    for elem in seg.get("elements", []):
-                        if pattern:
-                            try:
-                                if re.match(pattern, elem):
-                                    found = True
-                                    break
-                            except re.error:
-                                found = True
-                                break
-                    if found:
-                        break
-                if required and not found and pattern:
-                    errors.append(ValidationError(
-                        field=field_name,
-                        expected="Element matching: {}".format(pattern),
-                        actual="Not found in segments",
-                        description="Required EDI element '{}' not found".format(field_name)
-                    ))
+            # ── 5c: Check delimiter rules ──
+            if delimiter_rules:
+                print(f"\n{'─' * 70}")
+                print("🔤 DELIMITER CHECKS:")
+                print(f"{'─' * 70}")
 
-        elif format_type == "json":
-            required_fields = self.rules.get("required_fields", [])
+                expected_seg_delim = delimiter_rules.get("segment_delimiter")
+                expected_elem_delim = delimiter_rules.get("element_delimiter")
+                expected_sub_delim = delimiter_rules.get("sub_element_delimiter")
+
+                if expected_seg_delim:
+                    total_checks += 1
+                    actual_delim = "'" if format_type == "edifact" else "~"
+                    if actual_delim == expected_seg_delim:
+                        print(f"   ✅ Segment delimiter: '{actual_delim}' matches expected '{expected_seg_delim}'")
+                        passed_checks += 1
+                    else:
+                        print(f"   ❌ Segment delimiter: '{actual_delim}' ≠ expected '{expected_seg_delim}'")
+                        errors.append(ValidationError(
+                            field="delimiters",
+                            expected=f"Segment delimiter: '{expected_seg_delim}'",
+                            actual=f"Found: '{actual_delim}'",
+                            description="Segment delimiter mismatch",
+                        ))
+
+                if expected_elem_delim:
+                    total_checks += 1
+                    actual_delim = "+" if format_type == "edifact" else "*"
+                    if actual_delim == expected_elem_delim:
+                        print(f"   ✅ Element delimiter: '{actual_delim}' matches expected '{expected_elem_delim}'")
+                        passed_checks += 1
+                    else:
+                        print(f"   ❌ Element delimiter: '{actual_delim}' ≠ expected '{expected_elem_delim}'")
+                        errors.append(ValidationError(
+                            field="delimiters",
+                            expected=f"Element delimiter: '{expected_elem_delim}'",
+                            actual=f"Found: '{actual_delim}'",
+                            description="Element delimiter mismatch",
+                        ))
+
+        # ── 5d: Check required fields (for any format) ──
+        if required_fields:
+            print(f"\n{'─' * 70}")
+            print("📋 REQUIRED FIELD CHECKS:")
+            print(f"{'─' * 70}")
+
+            edi_upper = edi_content.upper()
             for field in required_fields:
-                if field not in parsed_data:
+                total_checks += 1
+                # Check if field name appears in content
+                field_found = field.replace("_", " ").upper() in edi_upper or field.upper() in edi_upper
+                if field_found:
+                    print(f"   ✅ '{field}' — found in EDI content")
+                    passed_checks += 1
+                else:
+                    print(f"   ❌ '{field}' — NOT found in EDI content")
                     errors.append(ValidationError(
-                        field=field,
-                        expected="Field '{}' present".format(field),
+                        field="fields",
+                        expected=f"Field '{field}' present",
                         actual="Field missing",
-                        description="Required field '{}' is missing".format(field)
+                        description=f"Required field '{field}' is missing",
                     ))
 
-        denominator = max(
-            len(required_segments or []) + len(self.rules.get("field_formats", {})) + 2, 1
-        )
-        compliance_score = max(0.0, 1.0 - (len(errors) / denominator))
+        # ── Step 6: Calculate score ──
+        if total_checks > 0:
+            compliance_score = round((passed_checks / total_checks) * 100, 1)
+        else:
+            compliance_score = 100.0
 
         status = "PASS" if not errors else "FAIL"
 
+        print(f"\n{'=' * 70}")
+        print(f"EDI VALIDATION RESULT: {status}")
+        print(f"Score: {compliance_score}% ({passed_checks}/{total_checks} checks passed)")
+        print(f"Errors: {len(errors)}")
+        if errors:
+            for e in errors:
+                print(f"   ❌ [{e.field}] {e.description}")
+        print("=" * 70 + "\n")
+
+        # ── Step 7: Generate corrected script ──
         corrected_script = None
         if errors:
-            corrected_script = self.generate_corrected_edi(
-                edi_content, format_type, errors, parsed_data
+            corrected_script = self._generate_corrected_script(
+                edi_content, format_type, errors
             )
 
         return {
             "status": status,
-            "errors": [e.dict() for e in errors],
+            "errors": [err.dict() for err in errors],
             "corrected_edi_script": corrected_script,
-            "compliance_score": compliance_score
+            "compliance_score": compliance_score,
         }
 
-    def generate_corrected_edi(
-        self,
-        original: str,
-        fmt: str,
-        errors: List[ValidationError],
-        parsed: Dict[str, Any]
+    def _generate_corrected_script(
+        self, original: str, format_type: str, errors: List[ValidationError]
     ) -> str:
-        if fmt in ["x12", "edifact"]:
-            delim = "~" if fmt == "x12" else "'"
-            elem_delim = "*" if fmt == "x12" else "+"
+        """
+        Generate a corrected EDI script by adding missing segments.
+        NOTE: This is a best-effort suggestion — not guaranteed to be correct.
+        """
+        corrected = original
 
-            segments = parsed.get("segments", [])
-            segment_ids = [seg["segment_id"] for seg in segments]
+        missing_segments = []
+        for err in errors:
+            if err.field == "segments" and "missing" in err.description.lower():
+                # Extract segment name from description
+                seg_match = re.search(r"segment '(\w+)'", err.description)
+                if seg_match:
+                    missing_segments.append(seg_match.group(1))
 
-            missing = []
-            for error in errors:
-                if error.field == "segments" and "missing" in error.description.lower():
-                    parts = error.expected.split("'")
-                    seg_name = parts[1] if len(parts) > 1 else ""
-                    if seg_name and seg_name not in segment_ids:
-                        missing.append(seg_name)
+        if missing_segments and format_type in ["x12", "edifact"]:
+            comment = "\n"
+            if format_type == "edifact":
+                # Add placeholder segments before UNT/UNZ
+                additions = []
+                for seg in missing_segments:
+                    additions.append(f"{seg}+PLACEHOLDER'")
+                placeholder_block = "\n".join(additions)
 
-            corrected = [elem_delim.join(seg["elements"]) for seg in segments]
+                # Try to insert before UNT
+                if "UNT+" in corrected:
+                    corrected = corrected.replace(
+                        "UNT+",
+                        f"{placeholder_block}\nUNT+",
+                    )
+                else:
+                    corrected += f"\n{placeholder_block}"
 
-            templates = {
-                "ISA": "ISA{}00{}          {}00".format(elem_delim, elem_delim, elem_delim),
-                "GS": "GS{}PO{}SENDER{}RECEIVER".format(elem_delim, elem_delim, elem_delim),
-                "ST": "ST{}850{}0001".format(elem_delim, elem_delim),
-                "SE": "SE{}10{}0001".format(elem_delim, elem_delim),
-                "GE": "GE{}1{}1".format(elem_delim, elem_delim),
-                "IEA": "IEA{}1{}000000001".format(elem_delim, elem_delim),
-            }
+            elif format_type == "x12":
+                additions = []
+                for seg in missing_segments:
+                    additions.append(f"{seg}*PLACEHOLDER~")
+                placeholder_block = "\n".join(additions)
 
-            for seg in missing:
-                if seg in templates:
-                    if seg in ["ISA", "UNB"]:
-                        corrected.insert(0, templates[seg])
-                    elif seg == "GS":
-                        corrected.insert(min(1, len(corrected)), templates[seg])
-                    elif seg in ["ST", "UNH"]:
-                        corrected.insert(min(2, len(corrected)), templates[seg])
-                    else:
-                        corrected.append(templates[seg])
+                if "SE*" in corrected:
+                    corrected = corrected.replace(
+                        "SE*",
+                        f"{placeholder_block}\nSE*",
+                    )
+                else:
+                    corrected += f"\n{placeholder_block}"
 
-            return delim.join(corrected) + delim
-
-        return original
+        return corrected

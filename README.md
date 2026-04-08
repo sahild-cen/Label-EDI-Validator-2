@@ -1,301 +1,237 @@
 # Label & EDI Validation Tool
 
-A complete full-stack specification-driven validation tool for shipping labels (ZPL/PNG/PDF) and EDI files (any format). The system is carrier-agnostic, modular, and production-ready (MVP level).
+A multi-carrier shipping label and EDI compliance validation tool that extracts validation rules from carrier specification PDFs and validates ZPL-format shipping labels against those rules.
 
-## Features
+## Overview
 
-- Upload carrier specifications (PDF) to generate validation rule templates
-- Validate shipping labels with OCR, barcode detection, and layout analysis
-- Validate EDI files with automatic format detection (X12, EDIFACT, JSON, XML, delimited, fixed-width)
-- Generate corrected ZPL and EDI scripts automatically
-- Rule-template driven validation (no hardcoded carrier logic)
-- Track validation history per carrier
-- Beautiful, responsive UI built with React and Tailwind CSS
+The system learns validation rules from carrier specification documents (UPS, DHL, FedEx, etc.) using a two-pass AI extraction pipeline, then validates shipping labels by checking whether required elements are present. It uses a feedback loop where user corrections improve future validations — no code changes needed.
+
+### How It Works
+
+```
+┌──────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│ Carrier Spec │────▶│  AI Extraction   │────▶│  Rules stored   │
+│   PDF        │     │  (Pass 1 + 2)    │     │  in MongoDB     │
+└──────────────┘     └──────────────────┘     └────────┬────────┘
+                                                       │
+┌──────────────┐     ┌──────────────────┐              │
+│  ZPL Label   │────▶│  Raw Extractor   │──────────────┤
+│  File        │     │  (all data)      │              │
+└──────────────┘     └──────────┬───────┘              │
+                                │                      │
+                     ┌──────────▼──────────────────────▼──┐
+                     │     Validation Engine               │
+                     │  (detect_by pattern matching)       │
+                     │                                     │
+                     │  For each rule:                     │
+                     │    detect_by → find on label        │
+                     │    found? → PASS                    │
+                     │    missing + required? → FAIL       │
+                     └──────────────┬──────────────────────┘
+                                    │
+                     ┌──────────────▼──────────┐
+                     │   Results + Feedback    │
+                     │   - Flag wrong errors   │
+                     │   - Report missing      │
+                     │     checks              │
+                     │   - Corrections feed    │
+                     │     back into rules     │
+                     └─────────────────────────┘
+```
 
 ## Tech Stack
 
-**Backend:**
-- Python 3.9+
-- FastAPI
-- Supabase (PostgreSQL database)
-- OpenCV (layout analysis)
-- Tesseract OCR (text extraction)
-- pyzbar (barcode detection)
-- pdfplumber (PDF text extraction)
-
-**Frontend:**
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- Lucide React (icons)
+- **Backend:** Python / FastAPI
+- **Frontend:** React / TypeScript
+- **Database:** MongoDB (via Motor async driver)
+- **AI:** Claude API (Anthropic) for rule extraction from PDFs
+- **Label Format:** ZPL (Zebra Programming Language)
 
 ## Project Structure
 
 ```
-label-edi-validator/
-├── backend/                    # Python FastAPI backend
-│   ├── app/
-│   │   ├── main.py            # FastAPI application
-│   │   ├── config.py          # Configuration
-│   │   ├── database.py        # Supabase client
-│   │   ├── models/            # Pydantic models
-│   │   ├── routes/            # API routes
-│   │   ├── services/          # Business logic
-│   │   └── utils/             # Utility functions
-│   ├── requirements.txt
-│   └── README.md
+backend/
+├── app/
+│   ├── main.py                    # FastAPI app, CORS, router registration
+│   ├── database.py                # MongoDB connection (Motor async)
+│   ├── config.py                  # Environment settings
+│   │
+│   ├── models/
+│   │   └── validation.py          # Pydantic models (ValidationError, etc.)
+│   │
+│   ├── routes/
+│   │   ├── carriers.py            # Carrier CRUD, spec PDF upload
+│   │   ├── validation.py          # Label validation endpoint
+│   │   └── corrections.py         # User feedback/corrections API
+│   │
+│   ├── services/
+│   │   ├── zpl_parser.py          # ZPL raw data extractor
+│   │   ├── label_validator.py     # Validation engine (detect_by matching)
+│   │   ├── claude_service.py      # AI client + Pass 1 extraction prompt
+│   │   ├── rule_extractor.py      # Full extraction pipeline orchestrator
+│   │   ├── rule_validator.py      # Pass 2 AI classification
+│   │   ├── rule_normalizer.py     # Field name normalization
+│   │   ├── rule_canonicalizer.py  # Field aliasing + golden rules
+│   │   ├── rule_merger.py         # Deduplicate/merge extracted rules
+│   │   ├── pdf_parser.py          # PDF text extraction + chunking
+│   │   ├── spec_matcher.py        # Auto-detect carrier from label
+│   │   └── edi_validator.py       # EDI file validation
+│   │
+│   └── utils/
+│       └── file_handler.py        # File upload handling
 │
-├── frontend/                   # React frontend (current directory)
-│   ├── src/
-│   │   ├── components/        # Reusable components
-│   │   ├── pages/             # Page components
-│   │   ├── services/          # API service
-│   │   └── App.tsx
-│   ├── package.json
-│   └── vite.config.ts
-│
-└── README.md                  # This file
+frontend/
+├── src/
+│   ├── components/
+│   │   ├── ValidationDashboard.tsx # Main validation UI
+│   │   └── CarrierSetup.tsx       # Carrier management UI
+│   └── services/
+│       └── api.ts                 # Backend API client
 ```
 
-## Setup Instructions
+## Key Architecture Concepts
+
+### 1. Two-Pass AI Rule Extraction
+
+When a carrier spec PDF is uploaded:
+
+**Pass 1** extracts candidate rules from the PDF text. Each rule includes a `detect_by` field that tells the validator how to find the element on a ZPL label.
+
+**Pass 2** classifies each candidate as `DATA_VALIDATION` (keep) or `SPEC_GUIDELINE` (discard). Only fields that are visible on the printed label survive.
+
+### 2. detect_by Pattern Matching
+
+Each rule in MongoDB includes a `detect_by` instruction:
+
+| detect_by | What it does | Example |
+|-----------|-------------|---------|
+| `zpl_command:^BD` | ZPL command present in script | MaxiCode barcode |
+| `barcode_data:^1Z` | Barcode data matches prefix | UPS tracking barcode |
+| `text_prefix:DATE:` | Text block starts with prefix | Shipment date |
+| `text_contains:phrase` | Text block contains phrase | International notice |
+| `text_pattern:regex` | Text block matches regex | Routing code format |
+| `text_exact:A\|B\|C` | Text block equals one of these | Documentation indicator |
+| `graphic:GFA` | Graphic element present | Service icon |
+| `spatial:ship_from` | Text in ship-from area | Sender address |
+| `spatial:ship_to` | Text in ship-to area | Receiver address |
+
+### 3. ZPL Raw Extractor
+
+The ZPL parser extracts ALL data from the label without assumptions:
+
+- **Text blocks** — every `^FD` value with x,y position and font size
+- **Barcodes** — every `^BC`, `^BD`, `^B7` etc. with type and data
+- **Graphics** — every `^GFA` with size
+- **ZPL commands** — complete list of all commands in the script
+
+No hardcoded field names. No carrier-specific logic. The validator uses detect_by to find what it needs in this raw data.
+
+### 4. Presence-Only Validation
+
+The system checks whether required elements are **present** on the label, not whether their content matches a specific regex. This avoids false failures from format mismatches across different label generators.
+
+### 5. Feedback Loop (Corrections)
+
+Users can submit two types of corrections:
+
+- **"This error is wrong"** — stores in `false_positive_overrides`, suppresses the error in future validations
+- **"Report missing check"** — injects the field directly into the carrier's active rules in MongoDB, checked on next validation
+
+Corrections are also injected as few-shot examples into future AI extraction prompts, so the system learns over time.
+
+## Setup
 
 ### Prerequisites
 
-1. **Node.js 18+** - For frontend development
-2. **Python 3.9+** - For backend API
-3. **Tesseract OCR** - For label text extraction
-4. **Supabase Account** - For database
+- Python 3.10+
+- Node.js 18+
+- MongoDB 6+
+- Claude API key (Anthropic)
 
-### Install Tesseract OCR
-
-**macOS:**
-```bash
-brew install tesseract
-```
-
-**Ubuntu/Debian:**
-```bash
-sudo apt-get install tesseract-ocr
-```
-
-**Windows:**
-Download and install from: https://github.com/UB-Mannheim/tesseract/wiki
-
-### 1. Database Setup
-
-The Supabase database schema has already been created with the following tables:
-- `carriers` - Store carrier information
-- `carrier_specs` - Store uploaded specs and rule templates
-- `validation_results` - Store validation history
-
-### 2. Backend Setup
+### Backend
 
 ```bash
 cd backend
-
-# Create virtual environment
 python -m venv venv
+venv\Scripts\activate          # Windows
+# source venv/bin/activate     # Mac/Linux
 
-# Activate virtual environment
-# macOS/Linux:
-source venv/bin/activate
-# Windows:
-venv\Scripts\activate
-
-# Install dependencies
 pip install -r requirements.txt
 
 # Create .env file
 cp .env.example .env
-
-# Edit .env and add your Supabase credentials:
-# SUPABASE_URL=https://your-project.supabase.co
-# SUPABASE_KEY=your-anon-key-here
-
-# Start the backend server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# Edit .env with your settings
 ```
 
-Backend will be available at `http://localhost:8000`
+**.env configuration:**
 
-API documentation at `http://localhost:8000/docs`
+```env
+MONGO_URI=mongodb://localhost:27017
+MONGO_DB_NAME=label_edi_validator
+CLAUDE_ENDPOINT=https://your-endpoint
+CLAUDE_DEPLOYMENT=your-deployment-name
+CLAUDE_API_KEY=your-api-key
+```
 
-### 3. Frontend Setup
+**Start the backend:**
 
 ```bash
-# Install dependencies
-npm install
+uvicorn app.main:app --reload --port 8000
+```
 
-# Start the development server
+### Frontend
+
+```bash
+cd frontend
+npm install
 npm run dev
 ```
 
-Frontend will be available at `http://localhost:5173`
+Frontend runs at `http://localhost:5173`, backend at `http://localhost:8000`.
 
-## Usage Guide
+## Usage
 
-### Step 1: Upload Carrier Specifications
+### 1. Upload Carrier Spec
 
-1. Navigate to the **Carrier Setup** page
-2. Enter the carrier name (e.g., "DHL", "UPS", "FedEx")
-3. Upload the Label Specification PDF (optional)
-4. Upload the EDI Specification PDF (optional)
-5. Click "Upload Carrier Specs"
+Navigate to the Carrier Setup page. Enter the carrier name (e.g., "UPS Europe") and upload the carrier's label specification PDF. The system extracts validation rules using the two-pass AI pipeline and stores them in MongoDB.
 
-The system will extract text from the PDFs and generate validation rule templates automatically.
+### 2. Validate a Label
 
-### Step 2: Validate Files
+Navigate to the Validation page. Upload a ZPL label file. The system auto-detects the carrier from the label content, matches it to the stored rules, and validates. Results show PASS/FAIL with details on each checked field.
 
-1. Navigate to the **Validation Dashboard**
-2. Select a carrier from the dropdown
-3. Upload a label file (ZPL, PNG, JPG, or PDF)
-   - Check "This is a ZPL file" if uploading a ZPL text file
-4. Click "Validate Label"
-5. Upload an EDI file (any text format)
-6. Click "Validate EDI"
+### 3. Correct Errors
 
-### Step 3: Review Results
+If validation produces a wrong error, click the flag button to suppress it. If the validator missed a required field, use "Report Missing Check" to add it. Corrections persist in MongoDB and apply to all future validations for that carrier.
 
-The system will display:
-- Validation status (PASS/FAIL)
-- Compliance score percentage
-- List of errors with detailed descriptions
-- Corrected scripts (if errors found)
-- Copy-to-clipboard buttons for corrected scripts
+## MongoDB Collections
 
-## What the System Validates
-
-### Label Validation
-
-- Field presence (tracking number, barcode, addresses)
-- Barcode detection and format
-- Layout structure and alignment
-- Text extraction accuracy
-- Required field formats
-
-### EDI Validation
-
-- Required segments presence
-- Segment order compliance
-- Field formats and patterns
-- Structure compliance
-- Delimiter correctness
-
-## Validation Rules
-
-All validation is rule-template driven. When you upload a carrier specification:
-
-1. The system extracts text from the PDF
-2. Generates a rule template with:
-   - Required fields/segments
-   - Field formats and patterns
-   - Layout constraints
-   - Validation patterns
-3. Stores the template in the database
-4. Uses the template for all future validations
-
-**No carrier-specific logic is hardcoded** - the system is completely carrier-agnostic.
-
-## Sample Test Files
-
-Sample test files are available in the `test-data/` directory:
-
-- `sample_label.zpl` - Sample ZPL label script
-- `sample_edi_x12.txt` - Sample X12 EDI file
-- `sample_edi_edifact.txt` - Sample EDIFACT EDI file
-- `sample_label_spec.pdf` - Sample label specification
-- `sample_edi_spec.pdf` - Sample EDI specification
+| Collection | Purpose |
+|-----------|---------|
+| `carriers` | Carrier specs with extracted rules (versioned) |
+| `validation_corrections` | Audit trail of all user corrections |
+| `false_positive_overrides` | Fields to suppress per carrier |
+| `mandatory_field_overrides` | User-added mandatory fields |
 
 ## API Endpoints
 
-### Carrier Management
-
-- `POST /api/carriers/upload` - Upload carrier specifications
-- `GET /api/carriers/list` - List all carriers
-- `GET /api/carriers/{carrier_id}` - Get carrier details
-- `DELETE /api/carriers/{carrier_id}` - Delete carrier
+### Carriers
+- `POST /api/carriers/upload` — Upload carrier spec PDF
+- `GET /api/carriers` — List all carriers
+- `DELETE /api/carriers/{id}` — Delete a carrier
 
 ### Validation
+- `POST /api/validate/detect-spec` — Auto-detect carrier from label
+- `POST /api/validate/label` — Validate a label against carrier rules
 
-- `POST /api/validate/label` - Validate shipping label
-- `POST /api/validate/edi` - Validate EDI file
-- `GET /api/validate/history/{carrier_id}` - Get validation history
+### Corrections
+- `POST /api/corrections` — Submit a correction (wrong_error or missing_check)
+- `GET /api/corrections` — List past corrections
 
-## Development
+## Design Principles
 
-### Run Frontend in Development Mode
-
-```bash
-npm run dev
-```
-
-### Run Backend in Development Mode
-
-```bash
-cd backend
-uvicorn app.main:app --reload
-```
-
-### Build Frontend for Production
-
-```bash
-npm run build
-```
-
-### Type Checking
-
-```bash
-npm run typecheck
-```
-
-### Linting
-
-```bash
-npm run lint
-```
-
-## Troubleshooting
-
-### Tesseract Not Found
-
-If you get a "Tesseract not found" error:
-- Ensure Tesseract is installed and in your PATH
-- On macOS: `brew install tesseract`
-- On Ubuntu: `sudo apt-get install tesseract-ocr`
-
-### CORS Errors
-
-If you get CORS errors:
-- Ensure the backend is running on `http://localhost:8000`
-- Check that the frontend API service uses the correct backend URL
-
-### Database Connection Issues
-
-If you get database connection errors:
-- Verify your `.env` file has correct Supabase credentials
-- Check that your Supabase project is active
-- Ensure the database schema has been created
-
-## Production Deployment
-
-### Backend Deployment
-
-1. Deploy to any Python hosting service (Railway, Render, Heroku, etc.)
-2. Set environment variables for `SUPABASE_URL` and `SUPABASE_KEY`
-3. Install Tesseract OCR on the server
-4. Run with: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-
-### Frontend Deployment
-
-1. Update `API_BASE_URL` in `src/services/api.ts` to your backend URL
-2. Build: `npm run build`
-3. Deploy the `dist/` folder to any static hosting (Vercel, Netlify, Cloudflare Pages, etc.)
-
-## License
-
-MIT
-
-## Support
-
-For issues and questions, please open a GitHub issue.
+1. **No hardcoded carrier logic** — all rules come from PDFs and user feedback
+2. **Learning over patching** — corrections in MongoDB, not code changes
+3. **Presence over content** — check if fields exist, not their exact format
+4. **Carrier-agnostic** — same pipeline works for UPS, DHL, FedEx, any carrier
+5. **detect_by over field names** — match data patterns, not field name strings
+6. **Surgical changes** — existing UI and structure preserved, features added minimally
